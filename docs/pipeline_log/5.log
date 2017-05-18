@@ -1,0 +1,105 @@
+
+<span class="stcmt">// Progression by Students' On-Track Status After Ninth Grade</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college AND are included in the on-track analysis sample</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
+local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
+keep if ontrack_sample == 1
+ 
+<span class="stcmt">// Step 3: Generate on-track indicators that take into account studentsҠGPAs upon completion of their first year in high school</span>
+label define ot 1 "Off-Track to Graduate" <span class="stcmt">///</span>
+2 "On-Track to Graduate, GPA &lt; 3.0" <span class="stcmt">///</span>
+3 "On-Track to Graduate, GPA &gt;= 3.0", replace
+
+gen ontrack_endyr1_gpa = .
+replace ontrack_endyr1_gpa = 1 if ontrack_endyr1 == 1
+replace ontrack_endyr1_gpa = 2 if ontrack_endyr1 == 2 &amp; cum_gpa_yr1 &lt; 3 &amp; !mi(cum_gpa_yr1)
+replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 2 &amp; cum_gpa_yr1 &gt;= 3 &amp; !mi(cum_gpa_yr1)
+
+assert !mi(ontrack_endyr1_gpa) if !mi(ontrack_endyr1) &amp; !mi(cum_gpa_yr1)
+label values ontrack_endyr1_gpa ot
+ 
+<span class="stcmt">// Step 4: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"</span>
+gen grad = (!mi(chrt_grad) &amp; ontime_grad == 1)
+gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 &amp; ontime_grad == 1)
+gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 &amp; enrl_1oct_ninth_yr2_any == 1 &amp; ontime_grad == 1)
+ 
+<span class="stcmt">// Step 5: Create average outcomes by on-track status at the end of ninth grade</span>
+collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, <span class="stcmt">///</span>
+by(ontrack_endyr1_gpa)
+ 
+<span class="stcmt">// Step 6: Format the outcome variables so they read as percentages in the graph</span>
+foreach var of varlist grad seamless_transitioners_any second_year_persisters {
+	replace `var' = (`var' * 100)
+	format `var' %9.1f
+}
+ 
+<span class="stcmt">// Step 7: Reformat the data file so that one variable contains all the outcomes of interest</span>
+<span class="stcmt">// 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence</span>
+foreach i of numlist 1/4 {
+	gen time`i' = `i'
+}
+
+<span class="stcmt">// 2. Reshape the data file from wide to long</span>
+reshape long time, i(ontrack_endyr1_gpa N)
+
+<span class="stcmt">// 3. Create a single variable that takes on all the outcomes of interest</span>
+bysort ontrack_endyr1_gpa: gen outcome = 100 if time == 1
+bysort ontrack_endyr1_gpa: replace outcome = grad if time == 2
+bysort ontrack_endyr1_gpa: replace outcome = seamless_transitioners_any if time == 3
+bysort ontrack_endyr1_gpa: replace outcome = second_year_persisters if time == 4
+format outcome %9.1f
+ 
+<span class="stcmt">// Step 8: Prepare to graph the results</span>
+<span class="stcmt">// 1. Label the outcome</span>
+label define outcome 1 "Ninth Graders" 2 "On-time Graduates" <span class="stcmt">///</span>
+3 "Seamless College Transitioners" 4 "Second Year Persisters"
+label values time outcome
+
+<span class="stcmt">// 2. Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_ninth_begin'-1
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+} 
+else {
+		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+ 
+<span class="stcmt">// Step 9: Graph the results</span>
+#delimit ;
+twoway (connected outcome time if ontrack_endyr1_gpa == 1,
+		sort lcolor(dkorange) mlabel(outcome) mlabc(black) mlabs(vsmall) mlabp(3)
+		mcolor(dkorange) msymbol(circle) msize(small))
+		(connected outcome time if ontrack_endyr1_gpa == 2, sort lcolor(navy*.6)
+		mlabel(outcome) mlabs(vsmall) mlabp(3) mlabc(black) mcolor(navy*.6)
+		msymbol(square) msize(small))
+		(connected outcome time if ontrack_endyr1_gpa == 3, sort lcolor(navy*.9)
+		mlabel(outcome) mlabs(vsmall) mlabp(3) mlabc(black) mcolor(navy*.9)
+		msymbol(diamond) msize(small))
+		(connected outcome time if ontrack_endyr1_gpa == 4, sort lcolor(navy*.3)
+		mlabel(outcome) mlabs(vsmall) mlabp(3) mlabc(black) mcolor(navy*.3)
+		msymbol(triangle) msize(small)),
+title("Student Progression from Ninth Grade Through College", size(medium))
+		ylabel(, nogrid)
+		subtitle("By Course Credits and GPA after First High School Year", size(medsmall))
+		xscale(range(.8(.2)4.2)) xlabel(1 2 3 4, valuelabels labsize(vsmall)) xtitle("")
+		yscale(range(0(20)100)) ylabel(0(20)100, labsize(small) format(%9.0f))
+		ytitle("Percent of Ninth Graders" " ")
+legend(order(3 2 1) col(1) position(1) size(vsmall)
+		label(1 "Off-Track to Graduate")
+		label(2 "On-Track to Graduate, GPA&lt;3.0")
+		label(3 "On-Track to Graduate, GPA&gt;=3.0")
+		ring(0) region(lpattern(none) lcolor(none) fcolor(none)))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of ${agency_name} are excluded" "from the sample. Postsecondary enrollment outcomes from NSC matched records. All other data are from ${agency_name} administrative records.", span size(vsmall));
+#delimit cr
+
+graph export "$figures/A4_Progression_by_OnTrack_Ninth.png", replace width(1600) height(1200)
+
+

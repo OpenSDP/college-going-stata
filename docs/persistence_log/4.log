@@ -1,0 +1,170 @@
+
+<span class="stcmt">// Top-Enrolling Colleges/Universities of Agency Graduates</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear 
+ 
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation</span>
+local chrt_grad_begin = ${chrt_grad_begin}
+local chrt_grad_end = ${chrt_grad_end}
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
+ 
+<span class="stcmt">// Step 3: Indicate the number of top-enrolling institutions you would like listed</span>
+local num_inst = 5
+
+<span class="stcmt">// Step 4: Calculate the number and % of students enrolled in each college the fall after graduation, </span>
+<span class="stcmt">// and the number and % of students persisting, by college type</span>
+
+<span class="stcmt">// 1. Calculate for 4-year colleges</span>
+preserve
+
+	collapse (sum) enrl_1oct_grad_yr1_4yr enrl_grad_persist_4yr, by(first_college_name_4yr)
+	keep if !mi(first_college_name_4yr)
+	egen total_enrolled = sum(enrl_1oct_grad_yr1_4yr)
+	egen total_persisted = sum(enrl_grad_persist_4yr)
+	gen pct_enrolled_college = round((enrl_1oct_grad_yr1_4yr / total_enrolled)*100, .1)
+	gen pct_persist_college = round((enrl_grad_persist_4yr / enrl_1oct_grad_yr1_4yr)*100, .1)
+	format pct* %3.1f
+	rename enrl_1oct_grad_yr1_4yr enrl_1oct_grad_yr1
+	rename enrl_grad_persist_4yr enrl_grad_persist
+	rename first_college_name_4yr first_college_name
+	gen type = "4yr"
+	tempfile college_4yr
+	save `college_4yr'
+	
+restore
+
+<span class="stcmt">// 2. Calculate for 2-year colleges, and append the information for 4-year colleges</span>
+collapse (sum) enrl_1oct_grad_yr1_2yr enrl_grad_persist_2yr, by(first_college_name_2yr)
+keep if !mi(first_college_name_2yr)
+egen total_enrolled = sum(enrl_1oct_grad_yr1_2yr)
+egen total_persisted = sum(enrl_grad_persist_2yr)
+gen pct_enrolled_college = round((enrl_1oct_grad_yr1_2yr / total_enrolled)*100, .1)
+gen pct_persist_college = round((enrl_grad_persist_2yr / enrl_1oct_grad_yr1_2yr)*100, .1)
+format pct* %3.1f
+rename enrl_1oct_grad_yr1_2yr enrl_1oct_grad_yr1
+rename enrl_grad_persist_2yr enrl_grad_persist
+rename first_college_name_2yr first_college_name
+gen type = "2yr"
+append using `college_4yr'
+
+<span class="stcmt">// Step 5: Create Table 1 with all 2-year and 4-year colleges listed</span>
+preserve
+
+    <span class="stcmt">// 1. Create two observations, one for each college type</span>
+	local newrows = _N+2
+	set obs `newrows'
+	replace  type="2yr" if _n==_N-1
+	replace  type="4yr" if _n==_N
+	
+	replace  first_college_name = "ALL 2-YEAR COLLEGES" if type=="2yr" &amp; mi(first_college_name)
+	replace  first_college_name = "ALL 4-YEAR COLLEGES" if type=="4yr" &amp; mi(first_college_name)
+
+	<span class="stcmt">// 2. Populate the new observations </span>
+	foreach type in 2 4 {
+		summ total_enrolled if type == "`type'yr"
+		replace enrl_1oct_grad_yr1 = r(mean) if first_college_name=="ALL `type'-YEAR COLLEGES"
+		summ total_persisted if type == "`type'yr"
+		replace enrl_grad_persist = r(mean) if first_college_name=="ALL `type'-YEAR COLLEGES"
+	}
+	replace pct_enrolled_college = 100 if mi(pct_enrolled_college)
+	
+	<span class="stcmt">// 3. Retain, reorder, and rename necessary variables</span>
+	keep first_college_name enrl_1oct_grad_yr1 enrl_grad_persist pct_enrolled_college pct_persist_college type
+	order first_college_name enrl_1oct_grad_yr1 pct_enrolled_college enrl_grad_persist pct_persist_college type
+	
+	gen rank = (regexm(first_college_name, "ALL"))
+	gsort -type rank -enrl_1oct_grad_yr1
+	drop rank type
+	
+	rename first_college_name College_Name
+	rename enrl_1oct_grad_yr1 Number_Enrolled
+	rename pct_enrolled_college Percent_Enrolled
+	rename enrl_grad_persist Number_Persisted
+	rename pct_persist_college Percent_Persisted
+
+	<span class="stcmt">// 4. Outsheet Table 1 into a csv file</span>
+	outsheet using "${figures}/E3_Top_Enrl_Col_Institutions_Table_1.csv", comma replace
+
+restore
+
+<span class="stcmt">// Step 6: Create Tables 2 and 3 with the number of institutions you wanted to list in Step 3 for 4-year (Table 2) and 2-year (Table 3) colleges, respectively</span>
+<span class="stcmt">// 1. Identify the five top-enrolling 2- and 4-year institutions (5 based on the number you selected in step 3)</span>
+gsort type -pct_enrolled_college
+gen rank_2yr = _n in 1/`num_inst' 
+
+gsort -type -pct_enrolled_college
+gen rank_4yr = _n in 1/`num_inst' 
+
+<span class="stcmt">// 2. Calculate the remaining proportion of students attending other 2- and 4-year colleges for purposes of populating the "Other" line (all other 2- and 4-year colleges beyond the number selected) in the table.</span>
+foreach type in 2yr 4yr {
+	egen other_number_`type'_temp = sum(enrl_1oct_grad_yr1) if mi(rank_`type') &amp; type=="`type'"
+	egen other_number_`type' = max(other_number_`type'_temp) 
+	egen other_pct_`type'_temp = sum(pct_enrolled_college) if mi(rank_`type') &amp; type=="`type'"
+	egen other_pct_`type' = max( other_pct_`type'_temp) 
+	egen other_number_persist_`type'_temp = sum(enrl_grad_persist) if mi(rank_`type') &amp; type=="`type'"
+	egen other_number_persist_`type' = max(other_number_`type'_temp) 
+	drop *_temp
+}
+
+keep if !mi(rank_2yr) | !mi(rank_4yr)
+
+<span class="stcmt">// 3. Create four new rows, one per college type for total counts and one per college type for colleges other than the top-enrolling ones</span>
+local newrows = _N+4
+set obs `newrows'
+replace  type="2yr" if _n==_N-2 | _n==_N-3
+replace  type="4yr" if _n==_N | _n==_N-1
+
+replace first_college_name = "OTHER 2-YEAR COLLEGES" if type=="2yr" &amp; mi(first_college_name) &amp; _n==_N-3
+replace first_college_name = "ALL 2-YEAR COLLEGES" if type=="2yr" &amp; mi(first_college_name) &amp; _n==_N-2
+replace first_college_name = "OTHER 4-YEAR COLLEGES" if type=="4yr" &amp; mi(first_college_name) &amp; _n==_N-1	
+replace first_college_name = "ALL 4-YEAR COLLEGES" if type=="4yr" &amp; mi(first_college_name) &amp; _n==_N
+
+<span class="stcmt">// 4. Populate the new rows</span>
+foreach type in 2 4 {
+	summ total_enrolled if type == "`type'yr"
+	replace enrl_1oct_grad_yr1 = r(mean) if first_college_name=="ALL `type'-YEAR COLLEGES"
+	summ total_persisted if type == "`type'yr"
+	replace enrl_grad_persist = r(mean) if first_college_name=="ALL `type'-YEAR COLLEGES"
+	summ other_number_`type'yr if type == "`type'yr"
+	replace enrl_1oct_grad_yr1 = r(mean) if first_college_name=="OTHER `type'-YEAR COLLEGES"
+	summ other_pct_`type'yr if type == "`type'yr"
+	replace pct_enrolled_college = r(mean) if first_college_name=="OTHER `type'-YEAR COLLEGES"
+	summ other_number_persist_`type'yr if type == "`type'yr"
+	replace enrl_grad_persist = r(mean) if first_college_name=="OTHER `type'-YEAR COLLEGES"
+}
+replace pct_enrolled_college = 100 if mi(pct_enrolled_college)
+
+<span class="stcmt">// 5. Retain, reorder, and rename necessary variables</span>
+keep first_college_name enrl_1oct_grad_yr1 enrl_grad_persist pct_enrolled_college pct_persist_college type
+order first_college_name enrl_1oct_grad_yr1 pct_enrolled_college enrl_grad_persist pct_persist_college type
+
+gen rank = (regexm(first_college_name, "ALL"))
+replace rank = 0.5 if regexm(first_college_name, "OTHER")
+gsort -type rank -enrl_1oct_grad_yr1
+drop rank
+
+rename first_college_name College_Name
+rename enrl_1oct_grad_yr1 Number_Enrolled
+rename pct_enrolled_college Percent_Enrolled
+rename enrl_grad_persist Number_Persisted
+rename pct_persist_college Percent_Persisted
+
+<span class="stcmt">// 6. Outsheet Table 2 (4-year colleges) into a csv file</span>
+preserve
+	keep if type=="4yr"
+	drop type
+	<span class="stcmt">// This is what the csv looks like</span>
+	list * if _n &lt;=5, table  
+	outsheet using "figures/E3_Top_Enrl_Col_Institutions_Table_2.csv", comma replace
+restore
+
+<span class="stcmt">// 7. Outsheet Table 3 (2-year colleges) into a csv file</span>
+preserve
+	keep if type=="2yr"
+	drop type
+	<span class="stcmt">// This is what the csv looks like</span>
+	list * if _n &lt;=5, table  
+	outsheet using "figures/E3_Top_Enrl_Col_Institutions_Table_3.csv", comma replace
+restore
+

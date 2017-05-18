@@ -1,0 +1,62 @@
+
+<span class="stcmt">// High School Completion Rates By School</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+ 
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school one year late</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_grad_late}
+local chrt_ninth_end = ${chrt_ninth_end_grad_late}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
+ 
+<span class="stcmt">// Step 3: Obtain the agency-level high school graduation rates.</span>
+preserve
+	collapse (mean) ontime_grad late_grad (count) N = sid
+	tempfile agency_level
+	save `agency_level'
+restore
+ 
+<span class="stcmt">// Step 4: Obtain the school-level high school graduation rates and append the agency average</span>
+collapse (mean) ontime_grad late_grad (count) N = sid, by(first_hs_name first_hs_code)
+append using `agency_level'
+ 
+<span class="stcmt">// Step 5: Provide a hs name label for the appended agency average and shorten hs name</span>
+replace first_hs_code = 0 if first_hs_code == .
+replace first_hs_name = "${agency_name} AVERAGE" if mi(first_hs_name)
+replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
+ 
+<span class="stcmt">// Step 6: Multiply the average of each outcome by 100 for graphical representation of the rates</span>
+foreach var of varlist ontime_grad late_grad {
+	replace `var' = `var' * 100
+	format `var' %9.1f
+}
+ 
+<span class="stcmt">// Step 7: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_ninth_begin'-1
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+ 
+<span class="stcmt">// Step 8: Graph the results</span>
+#delimit ;
+graph bar (sum) ontime_grad late_grad, stack over(first_hs_name, label(angle(40)
+    labsize(small)) gap(20) sort(ontime_grad))
+    blabel(bar, position(inside) color(black) size(small) format(%8.0f))
+    bar(1, fcolor(dkorange) fintensity(70) lcolor(black))
+    bar(2, fcolor(navy) fintensity(70) lcolor(black))
+legend(region(lcolor(white)) symxsize(3) symysize(2) rows(2) order(2 1) size(vsmall)
+    position(11) label(1 "On-Time High School Graduate") label(2 "Graduate in 4+ Yrs."))
+title("High School Graduation Rates by High School")
+    ytitle("Percent of Ninth Graders") yscale(range(0(20)100)) ylabel(0(20)100, nogrid)
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Data from ${agency_name} administrative records." , size(vsmall));
+#delimit cr
+
+graph export "figures/C1_HS_Grad_by_HS.png", replace width(1600) height(1200)
+

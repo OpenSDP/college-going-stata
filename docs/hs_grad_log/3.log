@@ -1,0 +1,81 @@
+
+<span class="stcmt">// High School Completion Rates by Average 8th Grade Achievement</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata.</span>
+use "$data/college_going_analysis", clear
+ 
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores.</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_grad}
+local chrt_ninth_end = ${chrt_ninth_end_grad}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8_std)
+ 
+<span class="stcmt">// Step 3: Obtain agency-level high school completion rate and prior achievement score along with the position of their labels.</span>
+summ ontime_grad
+local agency_mean_grad = `r(mean)'*100
+local agency_mean_grad_label = `agency_mean_grad' + 3
+summ test_math_8_std
+local agency_mean_test = `r(mean)'
+local agency_mean_test_label = `agency_mean_test' + 0.15
+ 
+<span class="stcmt">// Step 4: Obtain school-level high school completion and prior achievement rates</span>
+collapse (mean) test_math_8_std ontime_grad (count) N = sid, by(first_hs_code first_hs_name)
+drop if N &lt; 20
+ 
+<span class="stcmt">// Step 5: Multiply the high school completion rate by 100 for graphical representation of the rates,</span>
+replace ontime_grad = round((ontime_grad * 100), .1)
+ 
+<span class="stcmt">// Step 6: Shorten high school names and create a legend label for the graph</span>
+sort first_hs_name
+replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
+gen hs_code_label = _n
+ 
+levelsof first_hs_name, local(hs_names)
+local count = 1
+local legend_labels ""
+foreach hs of local hs_names {
+    local legend_labels `"`legend_labels' `count' = `hs'"' `" "'
+    local ++count
+}
+ 
+<span class="stcmt">// Step 7: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_ninth_begin'-1
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+ 
+<span class="stcmt">// Step 8: Graph the results</span>
+#delimit ;
+twoway (scatter ontime_grad test_math_8_std, mlabel(hs_code_label) mlabsize(vsmall)
+    mlabposition(12) mlabcolor(dknavy) mstyle(x) msize(small) mcolor(dknavy)),
+title("On-Time High School Graduation")
+    subtitle("By Student Achievement Profile Upon High School Entry")
+    xtitle("Average 8th Grade Math Standardized Score", linegap(0.3))
+    ytitle("Percent of Ninth Graders")
+    xscale(range(-0.8(0.2)1)) xlabel(-0.8(0.2)1)
+    yscale(range(0(20)100)) ylabel(0(20)100, nogrid)
+    legend(on order(3) col(1) label(3 `"`legend_labels'"')
+    region(color(none)) size(vsmall) position(2) ring(1) linegap(.75))
+yline(`agency_mean_grad', lpattern(dash) lcolor(dknavy) lwidth(vvthin))
+xline(`agency_mean_test', lpattern(dash) lcolor(dkorange) lwidth(vvthin))
+text(`agency_mean_grad_label' .8 "${agency_name} Average Graduation Rate", size(2.0) color(dknavy))
+text(2 `agency_mean_test_label' "${agency_name} Average" "Test Score", size(2.0) color(dkorange))
+text(99 -.5 "Below average math scores &amp;" "above average graduation rates",
+    size(vsmall) justification(left))
+text(99 0.8 "Above average math scores &amp;" "above average graduation rates",
+    size(vsmall) justification(right))
+text(2 -0.5 "Below average math scores &amp;" "below average graduation rates",
+    size(vsmall) justification(left))
+text(2 0.8 "Above average math scores &amp;" "below average graduation rates",
+    size(vsmall) justification(right))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note("Sample: `chrt_label' ${agency_name} first-time ninth graders with eighth grade math test scores." "All data from ${agency_name} administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/C2_HS_Grad_by_Avg_Eighth.png", replace width(1600) height(1200)
+

@@ -1,0 +1,82 @@
+
+<span class="stcmt">// Seamless and Delayed College Enrollment Rates by High School</span>
+
+if 0 {
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear 
+ 
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation</span>
+local chrt_grad_begin = ${chrt_grad_begin}
+local chrt_grad_end = ${chrt_grad_end}
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
+ 
+<span class="stcmt">// Step 3: Create binary outcomes for late enrollers</span>
+gen late_any = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_any==1
+gen late_4yr = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_4yr==1
+gen late_2yr = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_2yr==1
+assert late_4yr + late_2yr == late_any
+ 
+<span class="stcmt">// Step 4: Obtain the agency average for seamless and delayed enrollment        </span>
+preserve
+	collapse (sum) enrl_1oct_grad_yr1_2yr enrl_1oct_grad_yr1_4yr late_4yr late_2yr hs_diploma
+	tempfile agency_level
+	save `agency_level'
+restore
+ 
+<span class="stcmt">// Step 4: Obtain the school-level averages for seamless and delayed enrollment and append on the agency average                </span>
+collapse (sum) enrl_1oct_grad_yr1_2yr enrl_1oct_grad_yr1_4yr late_4yr late_2yr hs_diploma, by(last_hs_name last_hs_code)
+append using `agency_level'
+ 
+<span class="stcmt">// Step 5: Provide a hs name label for the appended agency average and shorten hs name</span>
+replace last_hs_name = "${agency_name} Average" if mi(last_hs_name)
+replace last_hs_code = 0 if mi(last_hs_code)
+replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
+ 
+<span class="stcmt">// Step 6: Generate percentages of high school grads attending college. Multiply outcomes of interest by 100 for graphical representations of the rates</span>
+foreach var of varlist enrl_1oct_grad_yr1_* late_* {
+	gen pct_`var' = `var' / hs_diploma
+	replace pct_`var' = round((pct_`var' * 100))
+}   
+ 
+<span class="stcmt">// Step 7: Create total college enrollment rates by summing up the other variables; you can add additional labels as you see fit                                                </span>
+gen total = pct_enrl_1oct_grad_yr1_2yr + pct_enrl_1oct_grad_yr1_4yr + pct_late_4yr + pct_late_2yr
+gen total_seamless = pct_enrl_1oct_grad_yr1_2yr + pct_enrl_1oct_grad_yr1_4yr
+ 
+<span class="stcmt">// Step 8: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_grad_begin'-1
+local temp_end = `chrt_grad_end'-1
+if `chrt_grad_begin'==`chrt_grad_end' {
+    local chrt_label "`temp_begin'-`chrt_grad_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
+}
+ 
+<span class="stcmt">// Step 9: Graph the results</span>
+#delimit ;
+graph bar pct_enrl_1oct_grad_yr1_4yr pct_late_4yr pct_enrl_1oct_grad_yr1_2yr pct_late_2yr 
+    if hs_diploma &gt;= 20, over(last_hs_name, label(angle(40)labsize(small)) gap(20) sort(total)) 
+    bar(1, fcolor(dkorange) fi(inten80) lcolor(dkorange) lwidth(vvvthin)) 
+    bar(2, fcolor(dkorange*.4) fi(inten80) lcolor(dkorange*.4) lwidth(vvvthin)) 
+    bar(3, fcolor(navy*.8) fi(inten80) lcolor(navy*.8) lwidth(vvvthin)) 
+    bar(4, fcolor(navy*.4) fi(inten30) lcolor(navy*.4) lwidth(vvvthin)) stack 
+    blabel(bar, position(inside) color(black) size(small)) 
+legend(label(1 "4-yr Seamless") 
+    label(2 "4-yr Delayed") 
+    label(3 "2-yr Seamless") 
+    label(4 "2-yr Delayed") 
+    position(11) order(4 3 2 1) ring(0) symxsize(2) symysize(2) rows(4) size(small) region(lstyle(none) lcolor(none) color(none))) 
+title("College Enrollment by High School", size(medium)) 
+    ytitle("Percent of High School Graduates") 
+    subtitle("Seamless and Delayed Enrollers") 
+    yscale(range(0(20)100)) 
+    ylabel(0(20)100, nogrid) 
+graphregion(color(white) fcolor(white) lcolor(white)) 
+plotregion(color(white) fcolor(white) lcolor(white)) 
+note("Sample: `chrt_label' ${agency_name} graduates."  
+"Postsecondary enrollment outcomes from NSC matched records. All other data from administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/D2_Col_Enrl_Seamless_Delayed_by_HS.png", replace width(1600) height(1200)
+}

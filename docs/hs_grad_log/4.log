@@ -1,0 +1,70 @@
+
+<span class="stcmt">// High School Completion Rates by 8th Grade Achievement Quartiles</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata.</span>
+use "$data/college_going_analysis", clear
+ 
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores.</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_grad}
+local chrt_ninth_end = ${chrt_ninth_end_grad}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8)
+ 
+<span class="stcmt">// Step 3: Obtain the overall agency-level high school graduation rate along with the position of its label.</span>
+summ ontime_grad
+local agency_mean = `r(mean)'*100
+local agency_mean_label = `agency_mean'+3
+ 
+<span class="stcmt">// Step 4: Obtain the agency-level high school graduation rates by test score quartile.</span>
+preserve
+	collapse (mean) ontime_grad (count) N = sid, by(qrt_8_math)
+	tempfile agency_level
+	save `agency_level'
+restore
+ 
+<span class="stcmt">// Step 5: Obtain school-level high school graduation rates by test score quartile and append the agency-level graduation rates by quartile</span>
+collapse (mean) ontime_grad (count) N = sid, by(first_hs_code first_hs_name qrt_8_math)
+append using `agency_level'
+ 
+<span class="stcmt">// Step 6: Shorten high school names and drop any high schools with fewer than 20 students</span>
+replace first_hs_code = 0 if first_hs_code == .
+replace first_hs_name = "${agency_name} Average" if mi(first_hs_name)
+replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
+drop if N &lt; 20
+ 
+<span class="stcmt">// Step 7: Multiply the high school completion rate by 100 for graphical representation of the rates</span>
+replace ontime_grad = round((ontime_grad * 100), .1)
+ 
+<span class="stcmt">// Step 8: Create a variable to sort schools within each test score quartile in ascending order</span>
+sort qrt_8_math ontime_grad
+gen rank = _n
+ 
+<span class="stcmt">// Step 9: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_ninth_begin'-1
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+ 
+<span class="stcmt">// Step 10: Graph the results</span>
+#delimit ;
+graph bar ontime_grad, over(first_hs_name, sort(rank) gap(0) label(angle(70) labsize(vsmall))) 
+    over(qrt_8_math, relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") gap(400))
+    bar(1, fcolor(dknavy) finten(70) lcolor(dknavy) lwidth(thin))
+    blabel(bar, format(%8.0f) size(1.5))
+    yscale(range(0(20)100)) ylabel(0(20)100, nogrid) legend(off)
+title("On-Time High School Graduation Rates")
+    subtitle("By Prior Student Achievement", size(msmall))
+    ytitle("Percent of Ninth Graders")
+    yline(`agency_mean', lpattern(dash) lwidth(vvthin) lcolor(dknavy))
+text(`agency_mean_label' 5 "${agency_name} Average", size(vsmall))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders with eighth grade math test scores." "All data from ${agency_name} administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/C3_HS_Grad_by_Eighth_Qrt.png", replace width(1600) height(1200)
+

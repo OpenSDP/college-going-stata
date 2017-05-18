@@ -1,0 +1,72 @@
+
+<span class="stcmt">// College Enrollment Rates by 8th Grade Achievement Quartiles</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+ 
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND have non-missing eighth grade math scores</span>
+local chrt_grad_begin = ${chrt_grad_begin}
+local chrt_grad_end = ${chrt_grad_end}
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end') &amp; !mi(qrt_8_math)
+ 
+<span class="stcmt">// Step 3: Obtain the overall agency-level high school graduation rate along with the position of its label.</span>
+summ enrl_1oct_grad_yr1_any
+local agency_mean = `r(mean)'*100
+local agency_mean_label = `agency_mean'+3
+ 
+<span class="stcmt">// Step 4: Obtain the agency-level college enrollment rate by test score quartile</span>
+preserve
+	collapse (mean) enrl_1oct_grad_yr1_any (count) N = sid, by(qrt_8_math)
+	tempfile agency_level
+	save `agency_level'
+restore
+ 
+<span class="stcmt">// Step 5: Obtain school-level college enrollment rates by test score quartile and append the agency-level enrollment rates by quartile </span>
+collapse (mean) enrl_1oct_grad_yr1_any (count) N = sid, by(last_hs_code last_hs_name qrt_8_math)
+append using `agency_level'
+ 
+<span class="stcmt">// Step 6: Shorten high school names and drop any high schools with fewer than 20 students</span>
+replace last_hs_code = 0 if last_hs_code == .
+replace last_hs_name = "${agency_name} AVERAGE" if mi(last_hs_name)
+replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
+drop if N &lt; 20
+ 
+<span class="stcmt">// Step 7: Multiply the college enrollment rate by 100 for graphical representation of the rates</span>
+replace enrl_1oct_grad_yr1_any = round((enrl_1oct_grad_yr1_any * 100), .1)
+ 
+<span class="stcmt">// Step 8: Create a variable to sort schools within each test score quartile in ascending order</span>
+sort qrt_8_math enrl_1oct_grad_yr1_any
+gen rank = _n
+ 
+<span class="stcmt">// Step 9: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_grad_begin'-1
+local temp_end = `chrt_grad_end'-1
+if `chrt_grad_begin'==`chrt_grad_end' {
+    local chrt_label "`temp_begin'-`chrt_grad_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
+}
+ 
+<span class="stcmt">// Step 10: Graph the results</span>
+#delimit ;
+graph bar enrl_1oct_grad_yr1_any, over(last_hs_name, sort(rank) gap(0) label(angle(70) labsize(vsmall)))
+    over(qrt_8_math, relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") gap(400))
+    bar(1, fcolor(dknavy) finten(70) lcolor(dknavy) lwidth(thin))
+    blabel(bar, position(outside) format(%8.0f) size(tiny))
+    yscale(range(0(20)100))
+    ylabel(0(20)100, nogrid)
+legend(off)
+title("College Enrollment Rates")
+    subtitle("By Prior Student Achievement, Seamless Enrollers Only", size(msmall))
+    ytitle("Percent of High School Graduates")
+    yline(`agency_mean', lpattern(dash) lwidth(vvthin) lcolor(dknavy))
+text(`agency_mean_label' 5 "${agency_name} Average", size(vsmall))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note("Sample: `chrt_label' ${agency_name} graduates with eighth grade math scores. Postsecondary enrollment" "outcomes from NSC matched records. All other data from ${agency_name} administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/D4_Col_Enrl_by_Eighth_Qrt.png", replace width(1600) height(1200)
+

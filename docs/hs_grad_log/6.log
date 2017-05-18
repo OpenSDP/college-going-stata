@@ -1,0 +1,91 @@
+if 0 {
+<span class="stcmt">// Enrollment Outcome in Year Four By On-Track Status At the End of Ninth Grade</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+ 
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND are part of the on-track sample (attended the first semester of ninth grade and never transferred into or out of the system)</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_grad}
+local chrt_ninth_end = ${chrt_ninth_end_grad}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(cum_gpa_yr1)
+keep if ontrack_sample==1
+ 
+<span class="stcmt">// Step 3: Make sure that the on-track status after year 4 is not missing</span>
+label define status 1 "Graduated On-Time" 2 "Still Enrolled" 3 "Dropout" 4 "Disappear", replace
+label values status_after_yr4 status
+tab status_after_yr4, m
+keep if !mi(status_after_yr4)
+ 
+<span class="stcmt">// Step 4: Keep only the variables of interest and generate graduation outcomes after year 4. Assign students as still enrolled if they have a graduation cohort but are not observed to be on-time graduates</span>
+keep status_after_yr4 ontrack_endyr1 chrt_grad chrt_ninth ontime_grad sid still_enrl dropout disappear cum_gpa_yr1
+gen hs_grad = (status_after_yr4 == 1)
+replace still_enrl = 1 if ontime_grad == 0 &amp; !mi(chrt_grad)
+ 
+<span class="stcmt">// Step 5: Ensure that the graduation outcome variables after year 4 are now mutually exclusive for each student</span>
+assert hs_grad + still_enrl + dropout + disappear == 1
+ 
+<span class="stcmt">// Step 6: Generate on-track indicators that take into account students' GPA upon completion of their first year in high school.</span>
+label define ot 1 "Off-Track to Graduate" 2 "On-Track, GPA &lt; 3.0" <span class="stcmt">///</span>
+3 "On-Track, GPA &gt;= 3.0", replace
+
+gen ontrack_endyr1_gpa = .
+replace ontrack_endyr1_gpa = 1 if ontrack_endyr1 == 0
+replace ontrack_endyr1_gpa = 2 if ontrack_endyr1 == 1 &amp; cum_gpa_yr1 &lt; 3 &amp; !mi(cum_gpa_yr1)
+replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 1 &amp; cum_gpa_yr1 &gt;= 3 &amp; !mi(cum_gpa_yr1)
+label values ontrack_endyr1_gpa ot
+ 
+<span class="stcmt">// Step 7: Create average outcomes by on-track status at the end of ninth grade.</span>
+collapse (mean) hs_grad still_enrl dropout disappear (count) N=sid, by(ontrack_endyr1_gpa)
+ 
+<span class="stcmt">// Step 8: Format the outcome variables so they read as percentages in the graph</span>
+foreach var of varlist hs_grad still_enrl dropout disappear {
+	replace `var' = ( `var' * 100)
+	format `var' %9.0f
+}
+ 
+<span class="stcmt">// Step 9: For students who dropout or disappear, convert their values to be negative for ease of visualization in the graph</span>
+foreach var in dropout disappear { 
+	replace `var' = `var'*-1
+}
+ 
+<span class="stcmt">// Step 10: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+
+<span class="stcmt">// Step 11: Graph the results</span>
+#delimit ;
+graph bar dropout disappear still_enrl hs_grad, over(ontrack_endyr1, gap(100) label(labsize(2.5)))  
+    stack blabel(bar, position(inside) color(black) format(%9.0f) size(2.1)) 
+    bar(1, fcolor(maroon*.8) lcolor(maroon*.85))    
+    bar(2, fcolor(dkorange*.5) lcolor(dkorange*.65) lwidth(vvthin)) 
+    bar(3, fcolor(navy*.5) lcolor(navy*.65) lwidth(vvthin)) 
+    bar(4, fcolor(navy*.8) lcolor(navy*.95) lwidth(vvthin)) 
+legend(col(1) order(4 3 1 2) 
+    lab(1 "Drop Out") 
+    lab(2 "Disappear" ) 
+    lab(3 "Still Enrolled") 
+    lab(4 "Graduated") 
+    size(2.3) symxsize(2) symysize(2) position(2) region(color(none)) title("Status After Year Four", size(2.5))) 
+title("Enrollment Status After Four Years in High School", size(large)) 
+    subtitle("By Course Credits and GPA after First Year of High School", size(medium)) 
+    ytitle("Percent of Students", size(small) margin(2 2 0 0)) 
+    yscale(range(-60(20)100)) 
+    ylabel(-60(20)100, nogrid labsize(small)) 
+    ylabel(-60 "60" -40 "40" -20 "20" 0 "0" 20 "20" 40 "40" 60 "60" 80 "80" 100 "100") 
+    yline(0, lcolor(black) lwidth(vvthin)) 
+text(-87 50 "Ninth Grade On-Track Status", size(small))  
+graphregion(color(white) fcolor(white) lcolor(white)) 
+plotregion(color(white) fcolor(white) lcolor(white)) 
+note(" " " " " " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of the agency" 
+"are excluded from the sample. All data from ${agency_name} administrative records." , size(vsmall));
+#delimit cr
+
+graph export "figures/C5_Yr4_Status_by_OnTrack_Ninth.png", replace width(1600) height(1200)
+
+}

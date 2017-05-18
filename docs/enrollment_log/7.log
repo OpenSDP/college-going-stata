@@ -1,0 +1,119 @@
+
+<span class="stcmt">// Gaps in Rates of College Enrollment Between Latino and White Graduates</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND have non-missing eighth grade test scores AND non-missing FRPL status</span>
+local chrt_grad_begin = ${chrt_grad_begin}
+local chrt_grad_end = ${chrt_grad_end}
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
+keep if frpl_ever != . | test_math_8 != .
+ 
+<span class="stcmt">// Step 3: Include only black, Latino, and white students</span>
+keep if race_ethnicity==1 | race_ethnicity == 3 | race_ethnicity == 5
+gen afam = (race_ethnicity == 1)
+gen hisp = (race_ethnicity == 3)
+gen white = (race_ethnicity == 5)
+
+<span class="stcmt">// Step 4: Estimate the unadjusted and adjusted differences in college enrollment between Latino and white students and between black and white students.</span>
+ 
+<span class="stcmt">// 1. Create a unique codeentifier for each cohort at each high school, so that we can cluster the standard errors at the cohort/high school level </span>
+egen cluster_var = concat(chrt_grad last_hs_code)
+ 
+<span class="stcmt">// 2. Fit 4 separate regression models with and without control variables, and save the coefficients associated with each race.</span>
+<span class="stcmt">// 2A. Estimate unadjusted enrollment gap</span>
+reg enrl_1oct_grad_yr1_any afam hisp, robust cluster(cluster_var)
+gen afam_unadj = _b[afam]
+gen hisp_unadj = _b[hisp]
+ 
+<span class="stcmt">// 2B. Estimate enrollment gap adjusting for prior achievement</span>
+reg enrl_1oct_grad_yr1_any afam hisp test_math_8, robust cluster(cluster_var)
+gen afam_adj_prior_ach = _b[afam]
+gen hisp_adj_prior_ach = _b[hisp]
+
+<span class="stcmt">// 2C. Estimate enrollment gap adjusting for FRPL status</span>
+reg enrl_1oct_grad_yr1_any afam hisp frpl_ever, robust cluster(cluster_var)
+gen afam_adj_frpl = _b[afam]
+gen hisp_adj_frpl = _b[hisp]
+ 
+<span class="stcmt">// 2D. Estimate enrollment gap adjusting for prior achievement and FRPL status</span>
+reg enrl_1oct_grad_yr1_any afam hisp frpl_ever test_math_8, robust cluster(cluster_var)
+gen afam_adj_prior_frpl = _b[afam]
+gen hisp_adj_prior_frpl = _b[hisp]
+ 
+<span class="stcmt">//3. Transform the regression coefficients estimated in Step 4.2 to be displayed in positive % terms</span>
+foreach race in afam hisp {
+	replace `race'_unadj = (0 - `race'_unadj) * 100
+	replace `race'_adj_prior_ach = (0 - `race'_adj_prior_ach) * 100
+	replace `race'_adj_frpl = (0 - `race'_adj_frpl) * 100
+	replace `race'_adj_prior_frpl = (0 - `race'_adj_prior_frpl) * 100
+}
+ 
+<span class="stcmt">// Step 5: Retain a data file containing only the regression coefficients</span>
+keep afam_* hisp_*
+duplicates drop
+ 
+<span class="stcmt">// Step 6: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_grad_begin'-1
+local temp_end = `chrt_grad_end'-1
+if `chrt_grad_begin'==`chrt_grad_end' {
+    local chrt_label "`temp_begin'-`chrt_grad_begin'"
+} 
+else {
+    local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
+}
+
+<span class="stcmt">// Step 7: Graph the results</span>
+<span class="stcmt">// 1. Graph results for black and white students</span>
+#delimit ;
+graph bar afam_unadj afam_adj_prior_ach afam_adj_frpl afam_adj_prior_frpl,
+    legend(row(2) size(vsmall) region(lcolor(white)) 
+    label(1 "Unadjusted enrollment gap") 
+    label(2 "Gap adjusted for prior achievement") 
+    label(3 "Gap adjusted for FRPL status") 
+    label(4 "Gap adjusted for prior achievement &amp; FRPL status")) 
+outergap(300)   
+blabel(bar, format(%9.0f) size(vsmall))
+    bar(1, fcolor(dknavy) lcolor(dknavy) fi(inten100)) 
+    bar(2, fcolor(dknavy) lcolor(dknavy) fi(inten70))
+    bar(3, fcolor(dknavy) lcolor(dknavy) fi(inten50)) 
+    bar(4, fcolor(dknavy) lcolor(dknavy) fi(inten20))
+    title("Differences In Rates Of College Enrollment" 
+    "Between Black High School Graduates And White High" 
+    "School Graduates", size(med))
+    ytitle("Percentage Points", margin(2 2 0 0) size(small))
+    yscale(range(0(10)50)) ylabel(0(10)50, labsize(small)) 
+    graphregion(color(white) fcolor(white) lcolor(white)) 
+    plotregion(color(white) fcolor(white) lcolor(white)) 
+note("Sample: `chrt_label' high school graduates. Postsecondary enrollment outcomes from NSC matched records. All other data from ${agency_name} administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/D6a_Col_Enrl_Gap_Black.png", replace width(1600) height(1200)
+
+#delimit ;
+graph bar hisp_unadj hisp_adj_prior_ach hisp_adj_frpl hisp_adj_prior_frpl,
+    legend(row(2) size(vsmall) region(lcolor(white)) 
+    label(1 "Unadjusted enrollment gap") 
+    label(2 "Gap adjusted for prior achievement") 
+    label(3 "Gap adjusted for FRPL status") 
+    label(4 "Gap adjusted for prior achievement &amp; FRPL status")) 
+    outergap(300)
+blabel(bar, format(%9.0f) size(vsmall))
+    bar(1, fcolor(dknavy) lcolor(dknavy) fi(inten100)) 
+    bar(2, fcolor(dknavy) lcolor(dknavy) fi(inten70))
+    bar(3, fcolor(dknavy) lcolor(dknavy) fi(inten50)) 
+    bar(4, fcolor(dknavy) lcolor(dknavy) fi(inten20))
+    title("Differences In Rates Of College Enrollment" 
+    "Between Latino High School Graduates And White High" 
+    "School Graduates", size(med))
+    ytitle("Percentage Points", margin(2 2 0 0) size(small))
+    yscale(range(0(10)50)) ylabel(0(10)50, labsize(small)) 
+    graphregion(color(white) fcolor(white) lcolor(white)) 
+    plotregion(color(white) fcolor(white) lcolor(white)) 
+note("Sample: `chrt_label' high school graduates. Postsecondary enrollment outcomes from NSC matched records." "All other data from ${agency_name} administrative records.", size(vsmall));
+#delimit cr
+
+graph export "figures/D6b_Col_Enrl_Gap_Latino.png", replace width(1600) height(1200)
+
