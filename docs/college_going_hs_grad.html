@@ -40,15 +40,6 @@ pre code, pre samp { white-space: pre; }
 </style>
 </head>
 <body>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129904036-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
- 
-  gtag('config', 'UA-129904036-1');
-</script>
 <style>
 .affix {
    position: static;
@@ -78,12 +69,6 @@ h1:before, h2:before, h3:before, h4:before {
   visibility: hidden;
 }
 
-#toc {
-    width: 100%;
-    text-align: left;
-    max-height: 100%;
-    overflow-y: auto;
-}
 #logo{
      background-color: #A51C30;
 }
@@ -94,137 +79,16 @@ body {
 html {
     overflow: visible;
 }
-
-
-#TOC ul,
-#TOC li,
-#TOC span,
-#TOC a {
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-#TOC {
-  line-height: 1;
-  border-radius: 5px 5px 0 0;
-  background: #141414;
-  background: linear-gradient(to bottom, #333333 0%, #141414 100%);
-  border-bottom: 2px solid #0fa1e0;
-  width: auto;
-}
-#TOC:after,
-#TOC ul:after {
-  content: '';
-  display: block;
-  clear: both;
-}
-#TOC a {
-  background: #141414;
-  background: linear-gradient(to bottom, #333333 0%, #141414 100%);
-  color: #ffffff;
-  display: block;
-  padding: 19px 20px;
-  text-decoration: none;
-  text-shadow: none;
-}
-#TOC ul {
-  list-style: none;
-}
-#TOC > ul > li {
-  display: inline-block;
-  float: left;
-  margin: 0;
-}
-#TOC > ul > li > a {
-  color: #ffffff;
-}
-#TOC > ul > li:hover:after {
-  content: '';
-  display: block;
-  width: 0;
-  height: 0;
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid #0fa1e0;
-  margin-left: -10px;
-}
-#TOC > ul > li:first-child > a {
-  border-radius: 5px 0 0 0;
-}
-#TOC.align-right > ul > li:first-child > a,
-#TOC.align-center > ul > li:first-child > a {
-  border-radius: 0;
-}
-#TOC.align-right > ul > li:last-child > a {
-  border-radius: 0 5px 0 0;
-}
-#TOC > ul > li.active > a,
-#TOC > ul > li:hover > a {
-  color: #ffffff;
-  box-shadow: inset 0 0 3px #000000;
-  background: #070707;
-  background: linear-gradient(to bottom, #262626 0%, #070707 100%);
-}
-#TOC .has-sub {
-  z-index: 1;
-}
-#TOC .has-sub:hover > ul {
-  display: block;
-}
-#TOC .has-sub ul {
-  display: none;
-  position: absolute;
-  width: 200px;
-  top: 100%;
-  left: 0;
-}
-#TOC .has-sub ul li a {
-  background: #0fa1e0;
-  border-bottom: 1px dotted #31b7f1;
-  filter: none;
-  display: block;
-  line-height: 120%;
-  padding: 10px;
-  color: #ffffff;
-}
-#TOC .has-sub ul li:hover a {
-  background: #0c7fb0;
-}
-#TOC ul ul li:hover > a {
-  color: #ffffff;
-}
-#TOC .has-sub .has-sub:hover > ul {
-  display: block;
-}
-#TOC .has-sub .has-sub ul {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: 0;
-}
-#TOC .has-sub .has-sub ul li a {
-  background: #0c7fb0;
-  border-bottom: 1px dotted #31b7f1;
-}
-#TOC .has-sub .has-sub ul li a:hover {
-  background: #0a6d98;
-}
-#TOC ul ul li.last > a,
-#TOC ul ul li:last-child > a,
-#TOC ul ul ul li.last > a,
-#TOC ul ul ul li:last-child > a,
-#TOC .has-sub ul li:last-child > a,
-#TOC .has-sub ul li.last > a {
-  border-bottom: 0;
-}
-#TOC ul {
-  font-size: 1.2rem;
-}
-
 </style>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129904036-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+ 
+  gtag('config', 'UA-129904036-1');
+</script>
 <div id="logo" class="navbar navbar-default navbar-fixed-top">
 <div class="container">
 <p><img src="https://opensdp.github.io/assets/images/OpenSDP-Banner_crimson.jpg" style="display: block; margin: 0 auto; height: 115px;"></p>
@@ -232,9 +96,9 @@ html {
 </div>
 <div class="container">
 <div class="row">
-<nav class="col-xs-12 col-sm-12 col-md-3" style = "padding-right: 10px;">
-<div id="toc" class="nav nav-stacked affix">
-<div class="well" style="overflow-wrap:break-word;">
+<nav class="col-xs-12 col-sm-12 col-md-3" style = "padding-right:15px;">
+<div id="toc" class="nav nav-stacked affix" style="overflow-wrap:break-word;">
+<div class="well" style="padding-right:10px; overflow-wrap:break-word;">
 <ul>
 <li>
 <a href="#h-1">High School Graduation</a>
@@ -383,45 +247,45 @@ High School Completion Rates By School
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school one year late</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad_late}
 local chrt_ninth_end = ${chrt_ninth_end_grad_late}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
- 
+
 <span class="stcmt">// Step 3: Obtain the agency-level high school graduation rates.</span>
 preserve
     collapse (mean) ontime_grad late_grad (count) N = sid
     tempfile agency_level
     save `agency_level'
 restore
- 
+
 <span class="stcmt">// Step 4: Obtain the school-level high school graduation rates and append the agency average</span>
 collapse (mean) ontime_grad late_grad (count) N = sid, by(first_hs_name first_hs_code)
 append using `agency_level'
- 
+
 <span class="stcmt">// Step 5: Provide a hs name label for the appended agency average and shorten hs name</span>
 replace first_hs_code = 0 if first_hs_code == .
 replace first_hs_name = "${agency_name} AVERAGE" if mi(first_hs_name)
 replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
- 
+
 <span class="stcmt">// Step 6: Multiply the average of each outcome by 100 for graphical representation of the rates</span>
 foreach var of varlist ontime_grad late_grad {
     replace `var' = `var' * 100
     format `var' %9.1f
 }
- 
+
 <span class="stcmt">// Step 7: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 8: Graph the results</span>
 #delimit ;
 graph bar (sum) ontime_grad late_grad, stack over(first_hs_name, label(angle(40)
@@ -471,12 +335,12 @@ High School Completion Rates by Average 8th Grade Achievement
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata.</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores.</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8_std)
- 
+
 <span class="stcmt">// Step 3: Obtain agency-level high school completion rate and prior achievement score along with the position of their labels.</span>
 summ ontime_grad
 local agency_mean_grad = `r(mean)'*100
@@ -484,19 +348,19 @@ local agency_mean_grad_label = `agency_mean_grad' + 3
 summ test_math_8_std
 local agency_mean_test = `r(mean)'
 local agency_mean_test_label = `agency_mean_test' + 0.15
- 
+
 <span class="stcmt">// Step 4: Obtain school-level high school completion and prior achievement rates</span>
 collapse (mean) test_math_8_std ontime_grad (count) N = sid, by(first_hs_code first_hs_name)
 drop if N &lt; 20
- 
+
 <span class="stcmt">// Step 5: Multiply the high school completion rate by 100 for graphical representation of the rates,</span>
 replace ontime_grad = round((ontime_grad * 100), .1)
- 
+
 <span class="stcmt">// Step 6: Shorten high school names and create a legend label for the graph</span>
 sort first_hs_name
 replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
 gen hs_code_label = _n
- 
+
 levelsof first_hs_name, local(hs_names)
 local count = 1
 local legend_labels ""
@@ -504,18 +368,18 @@ foreach hs of local hs_names {
     local legend_labels `"`legend_labels' `count' = `hs'"' `" "'
     local ++count
 }
- 
+
 <span class="stcmt">// Step 7: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 8: Graph the results</span>
 #delimit ;
 twoway (scatter ontime_grad test_math_8_std, mlabel(hs_code_label) mlabsize(vsmall)
@@ -581,55 +445,55 @@ High School Completion Rates by 8th Grade Achievement Quartiles
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata.</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores.</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8)
- 
+
 <span class="stcmt">// Step 3: Obtain the overall agency-level high school graduation rate along with the position of its label.</span>
 summ ontime_grad
 local agency_mean = `r(mean)'*100
 local agency_mean_label = `agency_mean'+3
- 
+
 <span class="stcmt">// Step 4: Obtain the agency-level high school graduation rates by test score quartile.</span>
 preserve
     collapse (mean) ontime_grad (count) N = sid, by(qrt_8_math)
     tempfile agency_level
     save `agency_level'
 restore
- 
+
 <span class="stcmt">// Step 5: Obtain school-level high school graduation rates by test score quartile and append the agency-level graduation rates by quartile</span>
 collapse (mean) ontime_grad (count) N = sid, by(first_hs_code first_hs_name qrt_8_math)
 append using `agency_level'
- 
+
 <span class="stcmt">// Step 6: Shorten high school names and drop any high schools with fewer than 20 students</span>
 replace first_hs_code = 0 if first_hs_code == .
 replace first_hs_name = "${agency_name} Average" if mi(first_hs_name)
 replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
 drop if N &lt; 20
- 
+
 <span class="stcmt">// Step 7: Multiply the high school completion rate by 100 for graphical representation of the rates</span>
 replace ontime_grad = round((ontime_grad * 100), .1)
- 
+
 <span class="stcmt">// Step 8: Create a variable to sort schools within each test score quartile in ascending order</span>
 sort qrt_8_math ontime_grad
 gen rank = _n
- 
+
 <span class="stcmt">// Step 9: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 10: Graph the results</span>
 #delimit ;
-graph bar ontime_grad, over(first_hs_name, sort(rank) gap(0) label(angle(70) labsize(vsmall))) 
+graph bar ontime_grad, over(first_hs_name, sort(rank) gap(0) label(angle(70) labsize(vsmall)))
     over(qrt_8_math, relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") gap(400))
     bar(1, fcolor(dknavy) finten(70) lcolor(dknavy) lwidth(thin))
     blabel(bar, format(%8.0f) size(1.5))
@@ -682,34 +546,34 @@ Racial Gaps in Completion Overall and by 8th Grade Achievement Quartiles
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8)
- 
+
 <span class="stcmt">// Step 3: Obtain the average on-time high school completion rate by race/ethnicity; you will restore in step 8</span>
 preserve
     collapse (mean) ontime_grad (count) N=sid, by(race_ethnicity)
- 
+
 <span class="stcmt">// Step 4: Multiply the high school completion rate by 100 for graphical representation of the rates</span>
     replace ontime_grad = (ontime_grad * 100)
- 
+
 <span class="stcmt">// Step 5: Reshape the data wide so that each race is associated with the outcome variable</span>
     gen id = _n
     reshape wide ontime_grad, i(id) j(race_ethnicity)
- 
+
 <span class="stcmt">// Step 6: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 7: Graph the results (1/2)</span>
 #delimit ;
 graph bar ontime_grad3 ontime_grad1 ontime_grad5 ontime_grad2,
@@ -741,13 +605,13 @@ restore
 collapse (mean) ontime_grad (count) N=sid, by(race_ethnicity qrt_8_math)
 replace ontime_grad = (ontime_grad * 100)
 reshape wide ontime_grad, i(qrt_8_math N) j(race_ethnicity)
- 
+
 <span class="stcmt">// Step 9: Graph the results (2/2)</span>
 #delimit ;
 graph bar ontime_grad3 ontime_grad1 ontime_grad5 ontime_grad2, over(qrt_8_math,
     relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") label(labsize(small)))
     bar(1, fcolor(forest_green*.7) lcolor(forest_green*.7)) bar(2, fcolor(dknavy*.7) lcolor(dknavy*.7))
-    bar(3, fcolor(orange*.7) lcolor(orange*.7)) bar(4, fcolor(lavender*.85) lcolor(lavender*.85)) 
+    bar(3, fcolor(orange*.7) lcolor(orange*.7)) bar(4, fcolor(lavender*.85) lcolor(lavender*.85))
     blabel(bar, format(%8.0f))
 title("On-Time High School Graduation Rates")
     subtitle("By Race and Prior Achievement")
@@ -786,27 +650,27 @@ Enrollment Outcome in Year Four By On-Track Status At the End of Ninth Grade
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND are part of the on-track sample (attended the first semester of ninth grade and never transferred into or out of the system)</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(cum_gpa_yr1)
 keep if ontrack_sample==1
- 
+
 <span class="stcmt">// Step 3: Make sure that the on-track status after year 4 is not missing</span>
 label define status 1 "Graduated On-Time" 2 "Still Enrolled" 3 "Dropout" 4 "Disappear", replace
 label values status_after_yr4 status
 tab status_after_yr4, m
 keep if !mi(status_after_yr4)
- 
+
 <span class="stcmt">// Step 4: Keep only the variables of interest and generate graduation outcomes after year 4. Assign students as still enrolled if they have a graduation cohort but are not observed to be on-time graduates</span>
 keep status_after_yr4 ontrack_endyr1 chrt_grad chrt_ninth ontime_grad sid still_enrl dropout disappear cum_gpa_yr1
 gen hs_grad = (status_after_yr4 == 1)
 replace still_enrl = 1 if ontime_grad == 0 &amp; !mi(chrt_grad)
- 
+
 <span class="stcmt">// Step 5: Ensure that the graduation outcome variables after year 4 are now mutually exclusive for each student</span>
 assert hs_grad + still_enrl + dropout + disappear == 1
- 
+
 <span class="stcmt">// Step 6: Generate on-track indicators that take into account students' GPA upon completion of their first year in high school.</span>
 label define ot 1 "Off-Track to Graduate" 2 "On-Track, GPA &lt; 3.0" <span class="stcmt">///</span>
 3 "On-Track, GPA &gt;= 3.0", replace
@@ -816,56 +680,56 @@ replace ontrack_endyr1_gpa = 1 if ontrack_endyr1 == 0
 replace ontrack_endyr1_gpa = 2 if ontrack_endyr1 == 1 &amp; cum_gpa_yr1 &lt; 3 &amp; !mi(cum_gpa_yr1)
 replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 1 &amp; cum_gpa_yr1 &gt;= 3 &amp; !mi(cum_gpa_yr1)
 label values ontrack_endyr1_gpa ot
- 
+
 <span class="stcmt">// Step 7: Create average outcomes by on-track status at the end of ninth grade.</span>
 collapse (mean) hs_grad still_enrl dropout disappear (count) N=sid, by(ontrack_endyr1_gpa)
- 
+
 <span class="stcmt">// Step 8: Format the outcome variables so they read as percentages in the graph</span>
 foreach var of varlist hs_grad still_enrl dropout disappear {
     replace `var' = ( `var' * 100)
     format `var' %9.0f
 }
- 
+
 <span class="stcmt">// Step 9: For students who dropout or disappear, convert their values to be negative for ease of visualization in the graph</span>
-foreach var in dropout disappear { 
+foreach var in dropout disappear {
     replace `var' = `var'*-1
 }
- 
+
 <span class="stcmt">// Step 10: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
 
 <span class="stcmt">// Step 11: Graph the results</span>
 #delimit ;
-graph bar dropout disappear still_enrl hs_grad, over(ontrack_endyr1, gap(100) label(labsize(2.5)))  
-    stack blabel(bar, position(inside) color(black) format(%9.0f) size(2.1)) 
-    bar(1, fcolor(maroon*.8) lcolor(maroon*.85))    
-    bar(2, fcolor(dkorange*.5) lcolor(dkorange*.65) lwidth(vvthin)) 
-    bar(3, fcolor(navy*.5) lcolor(navy*.65) lwidth(vvthin)) 
-    bar(4, fcolor(navy*.8) lcolor(navy*.95) lwidth(vvthin)) 
-legend(col(1) order(4 3 1 2) 
-    lab(1 "Drop Out") 
-    lab(2 "Disappear" ) 
-    lab(3 "Still Enrolled") 
-    lab(4 "Graduated") 
-    size(2.3) symxsize(2) symysize(2) position(2) region(color(none)) title("Status After Year Four", size(2.5))) 
-title("Enrollment Status After Four Years in High School", size(large)) 
-    subtitle("By Course Credits and GPA after First Year of High School", size(medium)) 
-    ytitle("Percent of Students", size(small) margin(2 2 0 0)) 
-    yscale(range(-60(20)100)) 
-    ylabel(-60(20)100, nogrid labsize(small)) 
-    ylabel(-60 "60" -40 "40" -20 "20" 0 "0" 20 "20" 40 "40" 60 "60" 80 "80" 100 "100") 
-    yline(0, lcolor(black) lwidth(vvthin)) 
-text(-87 50 "Ninth Grade On-Track Status", size(small))  
-graphregion(color(white) fcolor(white) lcolor(white)) 
-plotregion(color(white) fcolor(white) lcolor(white)) 
-note(" " " " " " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of the agency" 
+graph bar dropout disappear still_enrl hs_grad, over(ontrack_endyr1, gap(100) label(labsize(2.5)))
+    stack blabel(bar, position(inside) color(black) format(%9.0f) size(2.1))
+    bar(1, fcolor(maroon*.8) lcolor(maroon*.85))
+    bar(2, fcolor(dkorange*.5) lcolor(dkorange*.65) lwidth(vvthin))
+    bar(3, fcolor(navy*.5) lcolor(navy*.65) lwidth(vvthin))
+    bar(4, fcolor(navy*.8) lcolor(navy*.95) lwidth(vvthin))
+legend(col(1) order(4 3 1 2)
+    lab(1 "Drop Out")
+    lab(2 "Disappear" )
+    lab(3 "Still Enrolled")
+    lab(4 "Graduated")
+    size(2.3) symxsize(2) symysize(2) position(2) region(color(none)) title("Status After Year Four", size(2.5)))
+title("Enrollment Status After Four Years in High School", size(large))
+    subtitle("By Course Credits and GPA after First Year of High School", size(medium))
+    ytitle("Percent of Students", size(small) margin(2 2 0 0))
+    yscale(range(-60(20)100))
+    ylabel(-60(20)100, nogrid labsize(small))
+    ylabel(-60 "60" -40 "40" -20 "20" 0 "0" 20 "20" 40 "40" 60 "60" 80 "80" 100 "100")
+    yline(0, lcolor(black) lwidth(vvthin))
+text(-87 50 "Ninth Grade On-Track Status", size(small))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " " " " " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of the agency"
 "are excluded from the sample. All data from ${agency_name} administrative records." , size(vsmall));
 #delimit cr
 

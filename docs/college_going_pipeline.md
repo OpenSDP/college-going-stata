@@ -20,16 +20,6 @@ pre code, pre samp { white-space: pre; }
 </style>
 </head>
 <body>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129904036-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
- 
-  gtag('config', 'UA-129904036-1');
-</script>
-
 <style>
 .affix {
    position: static;
@@ -59,12 +49,6 @@ h1:before, h2:before, h3:before, h4:before {
   visibility: hidden;
 }
 
-#toc {
-	width: 100%;
-	text-align: left;
-	max-height: 100%;
-	overflow-y: auto;
-}
 #logo{
 	 background-color: #A51C30;
 }
@@ -75,147 +59,28 @@ body {
 html {
 	overflow: visible;
 }
-
-
-#TOC ul,
-#TOC li,
-#TOC span,
-#TOC a {
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-#TOC {
-  line-height: 1;
-  border-radius: 5px 5px 0 0;
-  background: #141414;
-  background: linear-gradient(to bottom, #333333 0%, #141414 100%);
-  border-bottom: 2px solid #0fa1e0;
-  width: auto;
-}
-#TOC:after,
-#TOC ul:after {
-  content: '';
-  display: block;
-  clear: both;
-}
-#TOC a {
-  background: #141414;
-  background: linear-gradient(to bottom, #333333 0%, #141414 100%);
-  color: #ffffff;
-  display: block;
-  padding: 19px 20px;
-  text-decoration: none;
-  text-shadow: none;
-}
-#TOC ul {
-  list-style: none;
-}
-#TOC > ul > li {
-  display: inline-block;
-  float: left;
-  margin: 0;
-}
-#TOC > ul > li > a {
-  color: #ffffff;
-}
-#TOC > ul > li:hover:after {
-  content: '';
-  display: block;
-  width: 0;
-  height: 0;
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid #0fa1e0;
-  margin-left: -10px;
-}
-#TOC > ul > li:first-child > a {
-  border-radius: 5px 0 0 0;
-}
-#TOC.align-right > ul > li:first-child > a,
-#TOC.align-center > ul > li:first-child > a {
-  border-radius: 0;
-}
-#TOC.align-right > ul > li:last-child > a {
-  border-radius: 0 5px 0 0;
-}
-#TOC > ul > li.active > a,
-#TOC > ul > li:hover > a {
-  color: #ffffff;
-  box-shadow: inset 0 0 3px #000000;
-  background: #070707;
-  background: linear-gradient(to bottom, #262626 0%, #070707 100%);
-}
-#TOC .has-sub {
-  z-index: 1;
-}
-#TOC .has-sub:hover > ul {
-  display: block;
-}
-#TOC .has-sub ul {
-  display: none;
-  position: absolute;
-  width: 200px;
-  top: 100%;
-  left: 0;
-}
-#TOC .has-sub ul li a {
-  background: #0fa1e0;
-  border-bottom: 1px dotted #31b7f1;
-  filter: none;
-  display: block;
-  line-height: 120%;
-  padding: 10px;
-  color: #ffffff;
-}
-#TOC .has-sub ul li:hover a {
-  background: #0c7fb0;
-}
-#TOC ul ul li:hover > a {
-  color: #ffffff;
-}
-#TOC .has-sub .has-sub:hover > ul {
-  display: block;
-}
-#TOC .has-sub .has-sub ul {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: 0;
-}
-#TOC .has-sub .has-sub ul li a {
-  background: #0c7fb0;
-  border-bottom: 1px dotted #31b7f1;
-}
-#TOC .has-sub .has-sub ul li a:hover {
-  background: #0a6d98;
-}
-#TOC ul ul li.last > a,
-#TOC ul ul li:last-child > a,
-#TOC ul ul ul li.last > a,
-#TOC ul ul ul li:last-child > a,
-#TOC .has-sub ul li:last-child > a,
-#TOC .has-sub ul li.last > a {
-  border-bottom: 0;
-}
-#TOC ul {
-  font-size: 1.2rem;
-}
-
 </style>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129904036-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+ 
+  gtag('config', 'UA-129904036-1');
+</script>
 <div class="navbar navbar-default navbar-fixed-top" id="logo">
  <div class="container">
 <img src="https://opensdp.github.io/assets/images/OpenSDP-Banner_crimson.jpg" style="display: block; margin: 0 auto; height: 115px;">
 </div>
 </div>
+<pre id="stlog-1" class="stcmd"><code><span class="stcmt">// Modify here, bug causes nav to spill behind body on ultra large resolutions</span>
+</code></pre>
 <div class="container">
 <div class="row">
-<nav class="col-xs-12 col-sm-12 col-md-3" style = "padding-right: 10px;">
-<div class="nav nav-stacked affix" id="toc">
-<div class="well" style = "overflow-wrap:break-word;">
+<nav class="col-xs-12 col-sm-12 col-md-3" style = "padding-right:15px;">
+<div class="nav nav-stacked affix" id="toc" style = "overflow-wrap:break-word;">
+<div class="well" style = "padding-right:10px; overflow-wrap:break-word;">
 <ul>
 <li><a href="#h-1">Attainment Along the Education Pipeline</a>
 <ul>
@@ -263,62 +128,62 @@ html {
 
 <h3 id="h-1-1-1">Objective</h3>
 
-In this guide you will be able to visualize the progress of students and student 
+In this guide you will be able to visualize the progress of students and student
 subgroups through important milestones from ninth grade through the second year of college
 
 <h3 id="h-1-1-2">Using this Guide</h3>
 
 The College-Going Pathways series is a set of guides, code, and sample data about
-policy-relevant college-going topics. Browse this and other guides in the series for 
-ideas about ways to investigate student pathways through high school and 
-college. Each guide includes several analyses in the form of charts together with Stata 
+policy-relevant college-going topics. Browse this and other guides in the series for
+ideas about ways to investigate student pathways through high school and
+college. Each guide includes several analyses in the form of charts together with Stata
 analysis and graphing code to generate each chart.
 
-Once you’ve identified analyses that you want to try to replicate or modify, click the 
-"Download" buttons to download Stata code and sample data. You can make changes to the 
-charts using the code and sample data, or modify the code to work with your own data. If 
-you're familiar with Github, you can click "Go to Repository" and clone the entire 
-College-Going Pathways repository to your own computer. 
+Once you’ve identified analyses that you want to try to replicate or modify, click the
+"Download" buttons to download Stata code and sample data. You can make changes to the
+charts using the code and sample data, or modify the code to work with your own data. If
+you're familiar with Github, you can click "Go to Repository" and clone the entire
+College-Going Pathways repository to your own computer.
 
 <h3 id="h-1-1-3">About the Data</h3>
 
-The data visualizations in the College-Going Pathways series use a synthetically 
-generated college-going analysis sample data file which has one record per student. Each 
-high school student is assigned to a ninth-grade cohort, and each student record includes 
-demographic and program participation information, annual GPA and on-track status, high 
-school graduation outcomes, and college enrollment information. The Connect guide (coming 
-soon) will provide guidance and example code which will help you build a college-going 
+The data visualizations in the College-Going Pathways series use a synthetically
+generated college-going analysis sample data file which has one record per student. Each
+high school student is assigned to a ninth-grade cohort, and each student record includes
+demographic and program participation information, annual GPA and on-track status, high
+school graduation outcomes, and college enrollment information. The Connect guide (coming
+soon) will provide guidance and example code which will help you build a college-going
 analysis file using data from your own school system.
 
 <h3 id="h-1-1-4">About the Analyses</h3>
 
-The analyses in this guide summarize student attainment 
+The analyses in this guide summarize student attainment
 from ninth grade through college using three milestones: 1) on-time high school
-completion, 2) seamless college transition, and 3) persistence to the second 
-year of college. 
+completion, 2) seamless college transition, and 3) persistence to the second
+year of college.
 
-Through these analyses, you identify drop-offs along the education pipeline for 
-students as a group and as subgroups. For different subgroups, these analyses 
+Through these analyses, you identify drop-offs along the education pipeline for
+students as a group and as subgroups. For different subgroups, these analyses
 illuminate disparities in college attainment by race, family income, high school
-attended, and academic achievement. A steep decline in college enrollment from 
-high school completion date for specific subgroups may indicate barriers to 
-college access. On the other hand, a steep decline from initial college 
-enrollment to second-year persistence might suggest students were not prepared 
-for rigorous college coursework during high school. 
+attended, and academic achievement. A steep decline in college enrollment from
+high school completion date for specific subgroups may indicate barriers to
+college access. On the other hand, a steep decline from initial college
+enrollment to second-year persistence might suggest students were not prepared
+for rigorous college coursework during high school.
 
 <h3 id="h-1-1-5">Sample Restrictions</h3>
 
-One of the most important decisions in running each analysis is 
-defining the sample. Each analysis corresponds to a different part of the education 
+One of the most important decisions in running each analysis is
+defining the sample. Each analysis corresponds to a different part of the education
 pipeline and as a result requires different cohorts of students.
 
-If you are using the synthetic data we have provided, the sample restrictions have been 
-predefined and are included below. If you run this code using your own agency data, 
-change the sample restrictions based on your data. Note that you will have to run these 
-sample restrictions at the beginning of your do file so they will feed into the rest of 
+If you are using the synthetic data we have provided, the sample restrictions have been
+predefined and are included below. If you run this code using your own agency data,
+change the sample restrictions based on your data. Note that you will have to run these
+sample restrictions at the beginning of your do file so they will feed into the rest of
 your code.
 
-<pre id="stlog-1" class="stcmd"><code>
+<pre id="stlog-2" class="stcmd"><code>
 global agency_name "Agency"
 
 <span class="stcmt">// Sample Restrictions</span>
@@ -345,31 +210,31 @@ global chrt_grad_end_delayed = 2009
 
 </code></pre>
 
-Based on the sample data, you will have three cohorts (sometimes only 
-two) for analysis. If you are using your own agency data, you may decide 
-to aggregate results for more or fewer cohorts to report your results. This 
-decision depends on 1) how much historical data you have available and 
+Based on the sample data, you will have three cohorts (sometimes only
+two) for analysis. If you are using your own agency data, you may decide
+to aggregate results for more or fewer cohorts to report your results. This
+decision depends on 1) how much historical data you have available and
 2) what balance to strike between reliability and averaging
-away information on recent trends. We suggest you average results for the last 
-three cohorts to take advantage of larger sample sizes and improve reliability. 
-However, if you have data for more than three cohorts, you may decide to not 
-average data out for fear of losing information about trends and recent changes 
+away information on recent trends. We suggest you average results for the last
+three cohorts to take advantage of larger sample sizes and improve reliability.
+However, if you have data for more than three cohorts, you may decide to not
+average data out for fear of losing information about trends and recent changes
 in your agency.
 
 <h3 id="h-1-1-6">Giving Feedback on this Guide</h3>
 
-This guide is an open-source document hosted on Github and generated using the Stata 
-Webdoc package. We welcome feedback, corrections, additions, and updates. Please 
+This guide is an open-source document hosted on Github and generated using the Stata
+Webdoc package. We welcome feedback, corrections, additions, and updates. Please
 visit the OpenSDP college-going pathways repository to read our contributor guidelines.
 
 <h2 id="h-1-2">Analyses</h2>
 
 <h3 id="h-1-2-1">Overall Progression</h3>
 
-**Purpose:** This analysis tracks the overall percent of ninth graders who 
-complete high school on-time, seamlessly enroll in college, and persist to the 
-second year of college. To examine the range of attainment at each milestone, 
-the minimum and maximum values of any high school are shown. 
+**Purpose:** This analysis tracks the overall percent of ninth graders who
+complete high school on-time, seamlessly enroll in college, and persist to the
+second year of college. To examine the range of attainment at each milestone,
+the minimum and maximum values of any high school are shown.
 
 **Required Analysis File Variables:**
 
@@ -384,32 +249,32 @@ the minimum and maximum values of any high school are shown.
 grade cohorts for which persistence to the second year of college
 can be reported.
 
-**Ask Yourself** 
+**Ask Yourself**
 
 - Do you notice drop-offs along the pipeline?
-- Are differences in agency maxima and minima at different points along the 
+- Are differences in agency maxima and minima at different points along the
 pipeline surprising? What might be different about these high schools?
-- Are your numbers in line with agency-reported figures in other publicly 
+- Are your numbers in line with agency-reported figures in other publicly
 available reports? What might account for differences?
 
-**Analytic Technique:** Calculate the proportion of first-time ninth graders that 
+**Analytic Technique:** Calculate the proportion of first-time ninth graders that
 progress to each step along the education pipeline.
 
-<figure id="fig-2">
-<a href="pipeline_img/2.png"><img alt="pipeline_img/2.png" src="pipeline_img/2.png"/></a>
+<figure id="fig-3">
+<a href="pipeline_img/3.png"><img alt="pipeline_img/3.png" src="pipeline_img/3.png"/></a>
 </figure>
-<pre id="stlog-2" class="stcmd"><code>
+<pre id="stlog-3" class="stcmd"><code>
 <span class="stcmt">// Overall Progression</span>
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
- 
-<span class="stcmt">// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters" </span>
+
+<span class="stcmt">// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"</span>
 gen grad = (!mi(chrt_grad) &amp; ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 &amp; ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 &amp; enrl_1oct_ninth_yr2_any == 1 &amp; ontime_grad == 1)
@@ -420,52 +285,52 @@ preserve
 
 <span class="stcmt">// 2. Calculate the mean of each outcome variable by agency</span>
 	collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N = sid
-	
+
 <span class="stcmt">// 3. Create a string variable called school_name equal to "${agency_name} Average"</span>
 	gen school_name = "${agency_name} AVERAGE"
-	
+
 <span class="stcmt">// 4. Save this data as a temporary file</span>
 	tempfile agency_level
 	save `agency_level'
-	
+
 <span class="stcmt">// 5. Restore the data to the original form</span>
 restore
- 
+
 <span class="stcmt">// Step 5: Create school-level maximum and minimum outcomes</span>
 <span class="stcmt">// 1. Create a variable school_name that takes on the value of studentsҠfirst high school attended</span>
 gen school_name = first_hs_name
 <span class="stcmt">// 2. Calculate the mean of each outcome variable by first high school attended</span>
 collapse (mean) grad seamless_transitioners second_year_persisters (count) N = sid, by(school_name)
- 
+
 <span class="stcmt">// 3. Identify the agency maximum values for each of the three outcome variables</span>
 preserve
 	collapse (max) grad seamless_transitioners_any second_year_persisters (count) N
 	gen school_name = "${agency_name} MAX HS"
-	
+
 	tempfile agency_max
 	save `agency_max'
 restore
- 
+
 <span class="stcmt">// 4. Identify the agency minimum values for each of the three outcome variables</span>
 preserve
 	collapse (min) grad seamless_transitioners_any second_year_persisters (count) N
 	gen school_name = "${agency_name} MIN HS"
-	
+
 	tempfile agency_min
 	save `agency_min'
 restore
- 
+
 <span class="stcmt">// 5. Append the three tempfiles to the school-level file loaded into Stata</span>
 append using `agency_level'
 append using `agency_max'
 append using `agency_min'
- 
+
 <span class="stcmt">// Step 6: Format the outcome variables so they read as percentages in the graph</span>
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 <span class="stcmt">// Step 7: Reformat the data file so that one variable contains all the outcomes of interest</span>
 <span class="stcmt">// 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence</span>
 foreach i of numlist 1/4 {
@@ -482,7 +347,7 @@ bysort school_name: replace outcome = grad if time == 2
 bysort school_name: replace outcome = seamless_transitioners_any if time == 3
 bysort school_name: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 <span class="stcmt">// Step 8: Prepare to graph the results</span>
 <span class="stcmt">// 1. Label the outcome</span>
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" <span class="stcmt">///</span>
@@ -494,11 +359,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 9: Graph the results</span>
 #delimit ;
 twoway (connected outcome time if school_name == "${agency_name} AVERAGE",
@@ -531,8 +396,8 @@ graph export "$figures/A1_Overall_Progression.png", replace width(1600) height(1
 </code></pre>
 <h3 id="h-1-2-2">Progression by Student Race/Ethnicity</h3>
 
-**Purpose:** This analysis tracks the percent of ninth graders of 
-different races/ethnicities who complete high school on-time, seamlessly enroll 
+**Purpose:** This analysis tracks the percent of ninth graders of
+different races/ethnicities who complete high school on-time, seamlessly enroll
 in college, and persist to the second year of college.
 
 **Required Analysis File Variables:**
@@ -545,50 +410,50 @@ in college, and persist to the second year of college.
 - `enrl_1oct_ninth_yr2_any`
 
 
-**Analysis-Specific Sample Restrictions:** 
+**Analysis-Specific Sample Restrictions:**
 
 - Keep students in ninth grade cohorts for which persistence
 to the second year of college can be reported.
 - Restrict the sample to include students from the most representative
 racial/ethnic sub-groups.
 
-**Ask Yourself** 
+**Ask Yourself**
 
 - Which races/ethnicities face larger drop-offs along the pipeline?
 - Might certain groups face different barriers to progressing along the education pipeline?
 
-**Analytic Technique:** Calculate the proportion of first-time ninth graders 
+**Analytic Technique:** Calculate the proportion of first-time ninth graders
 that progress to each step along the education pipeline.
 
-<figure id="fig-3">
-<a href="pipeline_img/3.png"><img alt="pipeline_img/3.png" src="pipeline_img/3.png"/></a>
+<figure id="fig-4">
+<a href="pipeline_img/4.png"><img alt="pipeline_img/4.png" src="pipeline_img/4.png"/></a>
 </figure>
-<pre id="stlog-3" class="stcmd"><code>
+<pre id="stlog-4" class="stcmd"><code>
 <span class="stcmt">// Progression by Student Race/Ethnicity</span>
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
- 
+
 <span class="stcmt">// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"</span>
 gen grad = (!mi(chrt_grad) &amp; ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 &amp; ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 &amp; enrl_1oct_ninth_yr2_any == 1 &amp; ontime_grad == 1)
- 
+
 <span class="stcmt">// Step 4: Create average outcomes by race/ethnicity</span>
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, <span class="stcmt">///</span>
 by(race_ethnicity)
- 
+
 <span class="stcmt">// Step 5: Format the outcome variables so they read as percentages in the graph</span>
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 <span class="stcmt">// Step 6: Reformat the data file so that one variable contains all the outcomes of interest</span>
 <span class="stcmt">// 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence</span>
 foreach i of numlist 1/4 {
@@ -609,7 +474,7 @@ bysort race_ethnicity: replace outcome = grad if time == 2
 bysort race_ethnicity: replace outcome = seamless_transitioners_any if time == 3
 bysort race_ethnicity: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 <span class="stcmt">// Step 7: Prepare to graph the results</span>
 <span class="stcmt">// 1. Label the outcome</span>
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" <span class="stcmt">///</span>
@@ -621,11 +486,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 8: Graph the results</span>
 #delimit;
 twoway (connected outcome time if race_ethnicity==1,
@@ -661,8 +526,8 @@ graph export "$figures/A2_Progression_by_RaceEthnicity.png", replace width(1600)
 <h3 id="h-1-2-3">Progression by Student Race/Ethnicity, Among FRPL Students</h3>
 
 **Purpose:**  This analysis tracks the percent of ninth graders of different
-races/ethnicities who ever qualified for free or reduce price lunch who complete 
-high school on-time, seamlessly enroll in college, and persist to the second 
+races/ethnicities who ever qualified for free or reduce price lunch who complete
+high school on-time, seamlessly enroll in college, and persist to the second
 year of college.
 
 **Required Analysis File Variables:**
@@ -675,44 +540,44 @@ year of college.
 - `enrl_1oct_ninth_yr1_any`
 - `enrl_1oct_ninth_yr2_any`
 
-**Analysis-Specific Sample Restrictions:** 
+**Analysis-Specific Sample Restrictions:**
 
-- Keep students in ninth grade cohorts for which persistence to the second year 
-of college can be reported. 
-- Restrict the analysis to include only students who were ever eligible to 
-receive free-or reduced-price lunch throughout their time in your agency, and 
-drop any race/ethnic groups with less than 20 students at any point along the 
+- Keep students in ninth grade cohorts for which persistence to the second year
+of college can be reported.
+- Restrict the analysis to include only students who were ever eligible to
+receive free-or reduced-price lunch throughout their time in your agency, and
+drop any race/ethnic groups with less than 20 students at any point along the
 pipeline.
 
-**Ask Yourself** 
+**Ask Yourself**
 
-- How do differences between races/ethnicities change along the pipeline when 
+- How do differences between races/ethnicities change along the pipeline when
 only students whoever qualifying for free or reduced price lunch are examined?
 
-**Analytic Technique:** Calculate the proportion of first-time ninth graders 
+**Analytic Technique:** Calculate the proportion of first-time ninth graders
 that progress to each step along the education pipeline.
 
-<figure id="fig-4">
-<a href="pipeline_img/4.png"><img alt="pipeline_img/4.png" src="pipeline_img/4.png"/></a>
+<figure id="fig-5">
+<a href="pipeline_img/5.png"><img alt="pipeline_img/5.png" src="pipeline_img/5.png"/></a>
 </figure>
-<pre id="stlog-4" class="stcmd"><code>
+<pre id="stlog-5" class="stcmd"><code>
 <span class="stcmt">// Progression by Student Race/Ethnicity, Among FRPL Students</span>
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college AND are ever FRPL-eligible</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
 keep if frpl_ever == 1
- 
+
 <span class="stcmt">// Next, repeat steps 3-9 from the previous analysis</span>
 <span class="stcmt">// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters" .</span>
 gen grad = (!mi(chrt_grad) &amp; ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 &amp; ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 &amp; enrl_1oct_ninth_yr2_any == 1 &amp; ontime_grad == 1)
- 
+
 <span class="stcmt">// Step 4: Create average outcomes by race/ethnicity and drop any race/ethnic groups with fewer than 20 students</span>
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, by(race_ethnicity)
 drop if N &lt; 20
@@ -722,7 +587,7 @@ foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 <span class="stcmt">// Step 6: Reformat the data file so that one variable contains all the outcomes of interest</span>
 <span class="stcmt">// 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence</span>
 foreach i of numlist 1/4 {
@@ -743,7 +608,7 @@ bysort race_ethnicity: replace outcome = grad if time == 2
 bysort race_ethnicity: replace outcome = seamless_transitioners_any if time == 3
 bysort race_ethnicity: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 <span class="stcmt">// Step 7: Prepare to graph the results</span>
 <span class="stcmt">// 1. Label the outcome</span>
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" <span class="stcmt">///</span>
@@ -755,11 +620,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 8: Graph the results</span>
 #delimit ;
 twoway (connected outcome time if race_ethnicity==1 , sort lcolor(dknavy) mlabel(outcome)
@@ -790,8 +655,8 @@ graph export "$figures/A3_Progression_by_RaceEthnicity_Frpl.png", replace width(
 </code></pre>
 <h3 id="h-1-2-4">Progression by Students' On-Track Status After Ninth Grade</h3>
 
-**Purpose:** This analysis tracks the percent of ninth graders at different 
-levels of being on-track for graduation who complete high school on-time, 
+**Purpose:** This analysis tracks the percent of ninth graders at different
+levels of being on-track for graduation who complete high school on-time,
 seamlessly enroll in college, and then persist to the second year of college.
 
 
@@ -807,7 +672,7 @@ seamlessly enroll in college, and then persist to the second year of college.
 - `enrl_1oct_ninth_yr2_any`
 
 
-**Analysis-Specific Sample Restrictions:** 
+**Analysis-Specific Sample Restrictions:**
 
 - Only include the three most recent ninth grade cohorts for
 which persistence to second year of college can be reported.
@@ -822,21 +687,21 @@ requirements as general education students, and if the
 designation can be made.
 
 
-**Ask Yourself** 
+**Ask Yourself**
 
-- How does being on-track for graduation after ninth grade relate to on-time 
+- How does being on-track for graduation after ninth grade relate to on-time
 graduation, seamless enrollment, and second year persistence?
-- How does being on-track after ninth grade with a higher GPA compare to being 
+- How does being on-track after ninth grade with a higher GPA compare to being
 on-track with a lower GPA?
 
 
-**Analytic Technique:** Calculate the proportion of first-time ninth graders 
+**Analytic Technique:** Calculate the proportion of first-time ninth graders
 that progressed along the education pipeline.
 
-<figure id="fig-5">
-<a href="pipeline_img/5.png"><img alt="pipeline_img/5.png" src="pipeline_img/5.png"/></a>
+<figure id="fig-6">
+<a href="pipeline_img/6.png"><img alt="pipeline_img/6.png" src="pipeline_img/6.png"/></a>
 </figure>
-<pre id="stlog-5" class="stcmd"><code>
+<pre id="stlog-6" class="stcmd"><code>
 <span class="stcmt">// Progression by Students' On-Track Status After Ninth Grade</span>
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
@@ -847,7 +712,7 @@ local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
 keep if ontrack_sample == 1
- 
+
 <span class="stcmt">// Step 3: Generate on-track indicators that take into account studentsҠGPAs upon completion of their first year in high school</span>
 label define ot 1 "Off-Track to Graduate" <span class="stcmt">///</span>
 2 "On-Track to Graduate, GPA &lt; 3.0" <span class="stcmt">///</span>
@@ -860,22 +725,22 @@ replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 2 &amp; cum_gpa_yr1 &gt;= 3 
 
 assert !mi(ontrack_endyr1_gpa) if !mi(ontrack_endyr1) &amp; !mi(cum_gpa_yr1)
 label values ontrack_endyr1_gpa ot
- 
+
 <span class="stcmt">// Step 4: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"</span>
 gen grad = (!mi(chrt_grad) &amp; ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 &amp; ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 &amp; enrl_1oct_ninth_yr2_any == 1 &amp; ontime_grad == 1)
- 
+
 <span class="stcmt">// Step 5: Create average outcomes by on-track status at the end of ninth grade</span>
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, <span class="stcmt">///</span>
 by(ontrack_endyr1_gpa)
- 
+
 <span class="stcmt">// Step 6: Format the outcome variables so they read as percentages in the graph</span>
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 <span class="stcmt">// Step 7: Reformat the data file so that one variable contains all the outcomes of interest</span>
 <span class="stcmt">// 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence</span>
 foreach i of numlist 1/4 {
@@ -891,7 +756,7 @@ bysort ontrack_endyr1_gpa: replace outcome = grad if time == 2
 bysort ontrack_endyr1_gpa: replace outcome = seamless_transitioners_any if time == 3
 bysort ontrack_endyr1_gpa: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 <span class="stcmt">// Step 8: Prepare to graph the results</span>
 <span class="stcmt">// 1. Label the outcome</span>
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" <span class="stcmt">///</span>
@@ -903,11 +768,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 9: Graph the results</span>
 #delimit ;
 twoway (connected outcome time if ontrack_endyr1_gpa == 1,

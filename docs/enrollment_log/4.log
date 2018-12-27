@@ -1,80 +1,82 @@
 
-<span class="stcmt">// College Enrollment Rates by Average 8th Grade Achievement</span>
+<span class="stcmt">// Seamless and Delayed College Enrollment Rates by High School</span>
 
+if 0 {
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
-<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND have non-missing eighth grade math scores</span>
+
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation</span>
 local chrt_grad_begin = ${chrt_grad_begin}
 local chrt_grad_end = ${chrt_grad_end}
-keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end') &amp; !mi(test_math_8_std)
- 
-<span class="stcmt">// Step 3: Obtain agency-level college enrollment rate and prior achievement score along with the position of their labels.</span>
-summ enrl_1oct_grad_yr1_any
-local agency_mean_enroll = `r(mean)'*100
-local agency_mean_enroll_label = `agency_mean_enroll' + 3
-summ test_math_8_std
-local agency_mean_test = `r(mean)'
-local agency_mean_test_label = `agency_mean_test' + 0.15
- 
-<span class="stcmt">// Step 4: Obtain school-level college enrollment rates and prior achievement scores</span>
-collapse (mean) test_math_8_std enrl_1oct_grad_yr1_any (count) N = sid, by(last_hs_code last_hs_name)
- 
-<span class="stcmt">// Step 5: Multiply the college enrollment rate by 100 for graphical representation of the rates</span>
-replace enrl_1oct_grad_yr1_any = round((enrl_1oct_grad_yr1_any * 100), .1)
- 
-<span class="stcmt">// Step 6: Shorten high school names and create a legend label for the graph</span>
-sort last_hs_name
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
+
+<span class="stcmt">// Step 3: Create binary outcomes for late enrollers</span>
+gen late_any = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_any==1
+gen late_4yr = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_4yr==1
+gen late_2yr = enrl_1oct_grad_yr1_any==0 &amp; enrl_ever_w2_grad_2yr==1
+assert late_4yr + late_2yr == late_any
+
+<span class="stcmt">// Step 4: Obtain the agency average for seamless and delayed enrollment</span>
+preserve
+	collapse (sum) enrl_1oct_grad_yr1_2yr enrl_1oct_grad_yr1_4yr late_4yr late_2yr hs_diploma
+	tempfile agency_level
+	save `agency_level'
+restore
+
+<span class="stcmt">// Step 4: Obtain the school-level averages for seamless and delayed enrollment and append on the agency average</span>
+collapse (sum) enrl_1oct_grad_yr1_2yr enrl_1oct_grad_yr1_4yr late_4yr late_2yr hs_diploma, by(last_hs_name last_hs_code)
+append using `agency_level'
+
+<span class="stcmt">// Step 5: Provide a hs name label for the appended agency average and shorten hs name</span>
+replace last_hs_name = "${agency_name} Average" if mi(last_hs_name)
+replace last_hs_code = 0 if mi(last_hs_code)
 replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
-gen hs_code_label = _n
-levelsof last_hs_name, local(hs_names)
-local count = 1
-local legend_labels ""
-foreach hs of local hs_names {
-	local legend_labels `"`legend_labels' `count' = `hs'"' `" "'
-	local ++count
+
+<span class="stcmt">// Step 6: Generate percentages of high school grads attending college. Multiply outcomes of interest by 100 for graphical representations of the rates</span>
+foreach var of varlist enrl_1oct_grad_yr1_* late_* {
+	gen pct_`var' = `var' / hs_diploma
+	replace pct_`var' = round((pct_`var' * 100))
 }
- 
-<span class="stcmt">// Step 7: Prepare to graph the results</span>
+
+<span class="stcmt">// Step 7: Create total college enrollment rates by summing up the other variables; you can add additional labels as you see fit</span>
+gen total = pct_enrl_1oct_grad_yr1_2yr + pct_enrl_1oct_grad_yr1_4yr + pct_late_4yr + pct_late_2yr
+gen total_seamless = pct_enrl_1oct_grad_yr1_2yr + pct_enrl_1oct_grad_yr1_4yr
+
+<span class="stcmt">// Step 8: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_grad_begin'-1
 local temp_end = `chrt_grad_end'-1
 if `chrt_grad_begin'==`chrt_grad_end' {
     local chrt_label "`temp_begin'-`chrt_grad_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
 }
- 
-<span class="stcmt">// Step 8: Graph the results</span>
+
+<span class="stcmt">// Step 9: Graph the results</span>
 #delimit ;
-twoway (scatter enrl_1oct_grad_yr1_any test_math_8_std, mlabel(hs_code_label) mlabsize(vsmall)
-    mlabposition(12) mlabcolor(dknavy) mstyle(x) msize(small) mcolor(dknavy)),
-title("College Enrollment Rates by Prior Student Achievement")
-    subtitle("Seamless Enrollers")
-    xtitle("Average 8th Grade Math Standardized Score", linegap(0.3))
-    ytitle("Percent of High School Graduates" " ")
-xscale(range(-0.8(0.2)1)) xlabel(-0.8(0.2)1)
-yscale(range(0(20)100)) ylabel(0(20)100, nogrid)
-legend(on order(3) col(1) label(3 `"`legend_labels'"')
-    region(color(none)) size(vsmall) position(2) ring(1) linegap(.75))
-    yline(`agency_mean_enroll', lpattern(dash) lcolor(dknavy) lwidth(vvthin))
-    xline(`agency_mean_test', lpattern(dash) lcolor(dkorange) lwidth(vvthin))
-text(`agency_mean_enroll_label' -0.45 "${agency_name} Average College Enrollment Rate", size(2.0) color(dknavy))
-text(20 `agency_mean_test_label' "${agency_name} Average" "Test Score", size(2.0) color(dkorange))
-text(99 -0.5 "Below average math scores &amp;" "above average college enrollment",
-    size(vsmall) justification(left))
-text(99 0.8 "Above average math scores &amp;" "above average college enrollment",
-    size(vsmall) justification(right))
-text(2 -0.5 "Below average math scores &amp;" "below average college enrollment",
-    size(vsmall) justification(left))
-text(2 0.8 "Above average math scores &amp;" "below average college enrollment",
-    size(vsmall) justification(right))
+graph bar pct_enrl_1oct_grad_yr1_4yr pct_late_4yr pct_enrl_1oct_grad_yr1_2yr pct_late_2yr
+    if hs_diploma &gt;= 20, over(last_hs_name, label(angle(40)labsize(small)) gap(20) sort(total))
+    bar(1, fcolor(dkorange) fi(inten80) lcolor(dkorange) lwidth(vvvthin))
+    bar(2, fcolor(dkorange*.4) fi(inten80) lcolor(dkorange*.4) lwidth(vvvthin))
+    bar(3, fcolor(navy*.8) fi(inten80) lcolor(navy*.8) lwidth(vvvthin))
+    bar(4, fcolor(navy*.4) fi(inten30) lcolor(navy*.4) lwidth(vvvthin)) stack
+    blabel(bar, position(inside) color(black) size(small))
+legend(label(1 "4-yr Seamless")
+    label(2 "4-yr Delayed")
+    label(3 "2-yr Seamless")
+    label(4 "2-yr Delayed")
+    position(11) order(4 3 2 1) ring(0) symxsize(2) symysize(2) rows(4) size(small) region(lstyle(none) lcolor(none) color(none)))
+title("College Enrollment by High School", size(medium))
+    ytitle("Percent of High School Graduates")
+    subtitle("Seamless and Delayed Enrollers")
+    yscale(range(0(20)100))
+    ylabel(0(20)100, nogrid)
 graphregion(color(white) fcolor(white) lcolor(white))
 plotregion(color(white) fcolor(white) lcolor(white))
-note("Sample: `chrt_label' ${agency_name} graduates with eighth grade math scores. Postsecondary enrollment" 
-"outcomes from NSC matched records. All other data from ${agency_name} administrative records.", size(vsmall));
+note("Sample: `chrt_label' ${agency_name} graduates."
+"Postsecondary enrollment outcomes from NSC matched records. All other data from administrative records.", size(vsmall));
 #delimit cr
 
-graph export "figures/D3_Col_Enrl_by_Avg_Eighth.png", replace width(1600) height(1200)
-
+graph export "figures/D2_Col_Enrl_Seamless_Delayed_by_HS.png", replace width(1600) height(1200)
+}

@@ -1,95 +1,72 @@
 
-<span class="stcmt">// Rates of College Enrollment by College Type Among Highly Qualified Graduates</span>
+<span class="stcmt">// College Enrollment Rates by 8th Grade Achievement Quartiles</span>
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
-<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation </span>
+
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND have non-missing eighth grade math scores</span>
 local chrt_grad_begin = ${chrt_grad_begin}
 local chrt_grad_end = ${chrt_grad_end}
-keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end') 
- 
-<span class="stcmt">// Step 3: Get total number of students in sample</span>
-gen total_count = _N
- 
-<span class="stcmt">// Step 4: Further restrict sample to include only highly qualified students</span>
-keep if highly_qualified == 1
- 
-<span class="stcmt">// Step 5: Create "undermatch" outcomes</span>
-gen no_college = (enrl_1oct_grad_yr1_any == 0)
-gen enrl_2yr = (enrl_1oct_grad_yr1_2yr == 1)
-gen enrl_4yr = (enrl_1oct_grad_yr1_4yr == 1)
- 
-<span class="stcmt">// Step 6: Create agency-level outcomes for total undermatching rates</span>
+keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end') &amp; !mi(qrt_8_math)
+
+<span class="stcmt">// Step 3: Obtain the overall agency-level high school graduation rate along with the position of its label.</span>
+summ enrl_1oct_grad_yr1_any
+local agency_mean = `r(mean)'*100
+local agency_mean_label = `agency_mean'+3
+
+<span class="stcmt">// Step 4: Obtain the agency-level college enrollment rate by test score quartile</span>
 preserve
-	collapse (mean) no_college enrl_2yr enrl_4yr total_count (count) N = sid
-	gen group = 5
-	tempfile total
-	save `total'
+	collapse (mean) enrl_1oct_grad_yr1_any (count) N = sid, by(qrt_8_math)
+	tempfile agency_level
+	save `agency_level'
 restore
- 
-<span class="stcmt">// Step 7: Create race/ethnicity-level outcomes for undermatching rates by race/ethnicity</span>
-collapse (mean) no_college enrl_2yr enrl_4yr total_count (count) N = sid , by(race_ethnicity)
-append using `total'
-replace group = 1 if race_ethnicity==1
-replace group = 2 if race_ethnicity==2
-replace group = 3 if race_ethnicity==3
-replace group = 4 if race_ethnicity==5
-drop if mi(group)
- 
-<span class="stcmt">// Step 8: Multiply the college enrollment rate by 100 for graphical representation of the rates</span>
-foreach v of varlist no_college enrl_2yr enrl_4yr {
-	replace `v' = round(`v'*100, .1)
-}
- 
-<span class="stcmt">// Step 9: Multiply the outcome variables corresponding to undermatching by "-1" to visually display these rates as negative values</span>
-foreach var of varlist no_college enrl_2yr {
-	replace `var' = `var'*-1
-}
- 
-<span class="stcmt">// Step 10: Prepare to graph the results</span>
-<span class="stcmt">// 1. Create labels for numbers in graph</span>
-gen pct_total = N/total_count
-sort group
-local numobs = _N
-foreach v of numlist 1/`numobs' {
-	local pct_`v' = round(pct_total*100) in `v'
-	local count_`v' = N in `v'
-}
-<span class="stcmt">// 2. Generate a cohort label to be used in the footnote for the graph</span>
+
+<span class="stcmt">// Step 5: Obtain school-level college enrollment rates by test score quartile and append the agency-level enrollment rates by quartile</span>
+collapse (mean) enrl_1oct_grad_yr1_any (count) N = sid, by(last_hs_code last_hs_name qrt_8_math)
+append using `agency_level'
+
+<span class="stcmt">// Step 6: Shorten high school names and drop any high schools with fewer than 20 students</span>
+replace last_hs_code = 0 if last_hs_code == .
+replace last_hs_name = "${agency_name} AVERAGE" if mi(last_hs_name)
+replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
+drop if N &lt; 20
+
+<span class="stcmt">// Step 7: Multiply the college enrollment rate by 100 for graphical representation of the rates</span>
+replace enrl_1oct_grad_yr1_any = round((enrl_1oct_grad_yr1_any * 100), .1)
+
+<span class="stcmt">// Step 8: Create a variable to sort schools within each test score quartile in ascending order</span>
+sort qrt_8_math enrl_1oct_grad_yr1_any
+gen rank = _n
+
+<span class="stcmt">// Step 9: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_grad_begin'-1
 local temp_end = `chrt_grad_end'-1
 if `chrt_grad_begin'==`chrt_grad_end' {
     local chrt_label "`temp_begin'-`chrt_grad_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
 }
- 
-<span class="stcmt">// Step 11: Graph the results</span>
+
+<span class="stcmt">// Step 10: Graph the results</span>
 #delimit ;
-graph bar enrl_4yr enrl_2yr no_college, stack over(group, 
-    relabel(1 `""African American" "`pct_1'% of Graduates""' 2 `""Asian American" "`pct_2'% of Graduates""' 3 `""Hispanic American" "`pct_3'% of Graduates""' 4 `""White" "`pct_4'% of Graduates""' 5 `""Total" "`pct_5'% of Graduates""') 
-    label(labsize(2.5)) gap(80)) blabel(bar, format(%9.0f) size(small) position(inside) color(black)) 
-    bar(1, fcolor(dknavy*.7) lcolor(dknavy*.7) lwidth(vvthin)) 
-    bar(2, fcolor(dknavy*.2) lcolor(dknavy*.2) lwidth(vvthin)) 
-    bar(3, fcolor(dkorange) lcolor(dkorange) lwidth(vvthin))    
-    yscale(range(-20(20)100)) 
-    ylabel(-20(20)100, nogrid labsize(small)) 
-    ylabel(-20 "20" 0 "0" 20 "20" 40 "40" 60 "60" 80 "80" 100 "100") 
-    yline(0, lcolor(black) lwidth(vvthin)) 
-title("Rates of Highly Qualified Students Attending College, by Race", size(medlarge) span) 
-    subtitle("Among Graduates Eligible to Attend Four-Year Universities", size(*.8) span) 
-    ytitle("Percent of Highly-Qualified Graduates" " ", size(small)) 
-legend(region(lcolor(white)) position(12) row(1) label(1 "Enrolled at 4-Yr College") 
-    label(2 "Enrolled at 2-Yr College") label(3 "Not Enrolled in College") symxsize(2) symysize(2) size(*.7)) 
-    graphregion(color(white) fcolor(white) lcolor(white)) 
-    plotregion(color(white) fcolor(white) lcolor(white)) 
-note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of ${agency_name} are excluded" 
-"from the sample. Eligibility to attend a public four-year university is based on students' cumulative GPA and ACT/SAT scores." 
-"Sample includes `count_1' African American, `count_2' Asian American students, `count_3' Hispanic, and `count_4' White students." 
-"Post-secondary enrollment data are from NSC matched records. $admin_nsc_note", size(2));
+graph bar enrl_1oct_grad_yr1_any, over(last_hs_name, sort(rank) gap(0) label(angle(70) labsize(vsmall)))
+    over(qrt_8_math, relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") gap(400))
+    bar(1, fcolor(dknavy) finten(70) lcolor(dknavy) lwidth(thin))
+    blabel(bar, position(outside) format(%8.0f) size(tiny))
+    yscale(range(0(20)100))
+    ylabel(0(20)100, nogrid)
+legend(off)
+title("College Enrollment Rates")
+    subtitle("By Prior Student Achievement, Seamless Enrollers Only", size(msmall))
+    ytitle("Percent of High School Graduates")
+    yline(`agency_mean', lpattern(dash) lwidth(vvthin) lcolor(dknavy))
+text(`agency_mean_label' 5 "${agency_name} Average", size(vsmall))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note("Sample: `chrt_label' ${agency_name} graduates with eighth grade math scores. Postsecondary enrollment" "outcomes from NSC matched records. All other data from ${agency_name} administrative records.", size(vsmall));
 #delimit cr
 
-graph export "figures/D5_Col_Enrl_HiQualified_by_Type.png", replace width(1600) height(1200)
+graph export "figures/D4_Col_Enrl_by_Eighth_Qrt.png", replace width(1600) height(1200)
 

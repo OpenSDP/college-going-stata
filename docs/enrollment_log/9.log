@@ -1,97 +1,61 @@
 
-<span class="stcmt">// Undermatch Rates Among Highly Qualified High School Graduates</span>
+<span class="stcmt">// College Enrollment Rates by 8th Grade Achievement Quartile Bubbles</span>
 
-<span class="stcmt">// Step 1: Load the post-sec analysis file into Stata</span>
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
-<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND are highly qualified</span>
+
+<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation AND have non-missing eighth grade test scores</span>
 local chrt_grad_begin = ${chrt_grad_begin}
 local chrt_grad_end = ${chrt_grad_end}
 keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
-keep if highly_qualified == 1
- 
-<span class="stcmt">// Step 3: Create college enrollment indicator variables for each college selectivity level. This script assumes that there are 5 levels of selectivity, as in Barron's College Rankings: Most Competitive (1), Highly Competitive (2), Very Competitive (3), Competitive (4), Least Competitive (5), as well as a category for colleges without assigned selectivity (assumed to be not competitive).</span>
-<span class="stcmt">//1. Create college enrollment dummy variables for each of the five selectivity levels</span>
-forvalues i = 1/5 {
-	gen enrl_1oct_grad_yr1_4yr_`i' = (enrl_1oct_grad_yr1_4yr == 1 &amp; rank == `i')
+keep if qrt_8_math != .
+
+<span class="stcmt">// Step 3: Create agency- and school-level average outcomes for each quartile</span>
+<span class="stcmt">// 1. Calculate the mean of each outcome variable by high school</span>
+collapse (sum) enrl_1oct_grad_yr1_any hs_diploma, by(last_hs_name qrt_8_math)
+gen pct_enrl = enrl_1oct_grad_yr1_any / hs_diploma * 100
+<span class="stcmt">// 2. Calculate the mean of each outcome variable for the agency as a whole</span>
+egen num = sum(enrl_1oct_grad_yr1_any), by(qrt_8_math)
+egen denom = sum(hs_diploma), by(qrt_8_math)
+gen agency_avg = num / denom * 100
+drop num denom
+
+<span class="stcmt">// Step 4: Create a variable to identify the test score quartile</span>
+gen agency_quartile_code = .
+forvalues qrt = 1(1)4 {
+	local qrt_plot = `qrt' * 2
+	replace agency_quartile_code = 1.`qrt_plot' if qrt_8_math == `qrt'
 }
- 
-<span class="stcmt">//2. Create a college enrollment dummy variable for colleges that are not ranked </span>
-gen enrl_1oct_grad_4yr_nr = (enrl_1oct_grad_yr1_4yr == 1 &amp; (rank == 6 | rank ==. ))
- 
-<span class="stcmt">//3. Rename and label the college enrollment variables with clear labels</span>
-rename enrl_1oct_grad_yr1_4yr_1 enrl_1oct_grad_4yr_mc
-rename enrl_1oct_grad_yr1_4yr_2 enrl_1oct_grad_4yr_hc
-rename enrl_1oct_grad_yr1_4yr_3 enrl_1oct_grad_4yr_vc
-rename enrl_1oct_grad_yr1_4yr_4 enrl_1oct_grad_4yr_c
-rename enrl_1oct_grad_yr1_4yr_5 enrl_1oct_grad_4yr_lc
 
-label var enrl_1oct_grad_4yr_mc "Enrolled at Most Competitive College Fall After HS Grad"
-label var enrl_1oct_grad_4yr_hc "Enrolled at Highly Competitive College Fall After HS Grad"
-label var enrl_1oct_grad_4yr_vc "Enrolled at Very Competitive College Fall After HS Grad"
-label var enrl_1oct_grad_4yr_c "Enrolled at Competitive College Fall After HS Grad"
-label var enrl_1oct_grad_4yr_lc "Enrolled at Least Competitive College Fall After HS Grad"
-label var enrl_1oct_grad_4yr_nr "Enrolled at Non-Competitive College Fall After HS Grad"
- 
-<span class="stcmt">//4. Check to make sure that each student who appears enrolled in college as of the first fall after high school graduation is associated with one and only one college selectivity level</span>
-assert enrl_1oct_grad_4yr_mc + enrl_1oct_grad_4yr_hc + enrl_1oct_grad_4yr_vc + enrl_1oct_grad_4yr_c + enrl_1oct_grad_4yr_lc + enrl_1oct_grad_4yr_nr == 1 if enrl_1oct_grad_yr1_4yr == 1
- 
-<span class="stcmt">// Step 4: Create undermatch outcomes</span>
-<span class="stcmt">//1. Not enrolled in college</span>
-gen no_college = (enrl_1oct_grad_yr1_any == 0)
- 
-<span class="stcmt">//2. Enrolled in a 2-year college</span>
-gen enrl_2yr = (enrl_1oct_grad_yr1_2yr == 1)
-
-<span class="stcmt">//3. Enrolled in a least competitive 4-year college or a 4-year college without an assigned selectivity</span>
-gen enrl_4yr_under = (enrl_1oct_grad_4yr_nr == 1)
-replace enrl_4yr_under = 1 if enrl_1oct_grad_4yr_lc == 1
-
-<span class="stcmt">//4. Enrolled in a 4-year college with a selectivity rating of Competitive, Very Competitive, Most Competitive, or Highly Competitive</span>
-gen enrl_4yr_match = (enrl_1oct_grad_4yr_c == 1 | enrl_1oct_grad_4yr_vc == 1 | enrl_1oct_grad_4yr_hc == 1 | enrl_1oct_grad_4yr_mc == 1)
-
-<span class="stcmt">//5. Check to make sure that each student is associated one and only one undermatch outcome</span>
-<span class="stcmt">// assert no_college + enrl_2yr + enrl_4yr_under + enrl_4yr_match == 1</span>
- 
-<span class="stcmt">// Step 5: Create agency-average undermatch outcomes and transform them into % terms</span>
-collapse (mean) no_college enrl_2yr enrl_4yr_under enrl_4yr_match (count) N = sid
-foreach v of varlist no_college enrl_2yr enrl_4yr_under enrl_4yr_match {
-	replace `v' = round(`v' * 100, 0.1)
-}
- 
-<span class="stcmt">// Step 6: Prepare to graph the results</span>
+<span class="stcmt">// Step 5: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_grad_begin'-1
 local temp_end = `chrt_grad_end'-1
 if `chrt_grad_begin'==`chrt_grad_end' {
     local chrt_label "`temp_begin'-`chrt_grad_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
 }
 
-<span class="stcmt">// Step 7: Graph the results</span>
+<span class="stcmt">// Step 6: Graph the results</span>
 #delimit ;
-graph bar no_college enrl_2yr enrl_4yr_under, stack
-    blabel(bar, format(%9.1f) size(2.05) position(inside) color(white)) 
-    bar(1, fcolor(dknavy) lcolor(dknavy) finten(200) lwidth(thin)) 
-    bar(2, fcolor(dknavy) lcolor(dknavy) finten(90) lwidth(thin)) 
-    bar(3, fcolor(dknavy) lcolor(dknavy) finten(40) lwidth(thin))
-    yscale(range(0(5)65)) outergap(400)
-    ylabel(0(5)65, labsize(small)) 
-title("Undermatch Rates by Agency" 
-    "Among Highly Qualified High School Graduates", size(med)) 
-    ytitle("Percent of High School Graduates" " ", size(small)) 
-legend(region(lcolor(white)) 
-    label(1 "Not Enrolled in College") 
-    label(2 "Enrolled at 2-Year College") 
-    label(3 "Enrolled at Unranked or Less Competitive 4-Year College") 
-    symxsize(*.7) symysize(*.7) size(*.7)) 
-graphregion(color(white) fcolor(white) lcolor(white)) 
+graph twoway scatter pct_enrl agency_quartile_code [aweight = hs_diploma],
+    msymbol(Oh) msize(vsmall) mcolor(dknavy) ||
+scatter agency_avg agency_quartile_code,
+    mcolor(cranberry) msymbol(D) msize(small)
+title("College Enrollment Rates Among High School"
+"Graduates Within Quartile Of Prior Achievement,"
+"By High School", size(med))
+    xscale(range(1 2)) yscale(range(0 105)) ylabel(0 20 40 60 80 100)
+    xlabel(1.2 "Q1" 1.4 "Q2" 1.6 "Q3" 1.8 "Q4", labsize(small))
+    xtitle(" " "Quartile of Prior Achievement") ytitle("Percent" " ")
+    ylabel(,nogrid) legend(off)
+graphregion(color(white) fcolor(white) lcolor(white))
 plotregion(color(white) fcolor(white) lcolor(white))
-note("Sample: `chrt_label' high school graduates. Postsecondary enrollment outcomes from NSC matched records." 
-"All other data from ${agency_name} administrative records.", size(vsmall)) ;
+note("Sample: `chrt_label' high school graduates. Postsecondary enrollment outcomes from NSC matched records."
+"All other data from ${agency_name} administrative records.", size(vsmall));
 #delimit cr
 
-graph export "figures/D8_Undermatching_HiQualified.png", replace width(1600) height(1200)
+graph export "figures/D7_Col_Enrl_by_Eighth_Qrt_Bubbles.png", replace width(1600) height(1200)
 

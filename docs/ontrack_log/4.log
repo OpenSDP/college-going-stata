@@ -1,0 +1,96 @@
+
+<span class="stcmt">// Ninth To Tenth Grade Transition by On-Track Status</span>
+
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+
+<span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school on time AND are part of the on-track sample</span>
+local chrt_ninth_begin = ${chrt_ninth_begin_grad}
+local chrt_ninth_end = ${chrt_ninth_end_grad}
+keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end')
+keep if ontrack_sample == 1
+
+<span class="stcmt">// Step 3: Create on-track categories that account for studentsҠcredits earned (already captured in the ontrack_endyr1 variable) and GPA after ninth grade</span>
+gen ontrack_endyr1_gpa = .
+replace ontrack_endyr1_gpa = 1 if ontrack_endyr1 == 1
+replace ontrack_endyr1_gpa = 2 if ontrack_endyr1 == 2 &amp; cum_gpa_yr1 &lt; 3.0
+replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 2 &amp; cum_gpa_yr1 &gt;= 3.0 &amp; !mi(cum_gpa_yr1)
+
+assert !mi(ontrack_endyr1_gpa) if !mi(ontrack_endyr1) &amp; !mi(cum_gpa_yr1)
+
+label define ot 1 "Off-Track to Graduate" 2 "On-Track, GPA&lt;3.00" 3 "On-Track, GPA&gt;=3.00"
+label val ontrack_endyr1_gpa ot
+
+<span class="stcmt">// Step 4: Create indicators for students upon completion of their second year of high school</span>
+gen ontrack_endyr2_1 = 0
+replace ontrack_endyr2_1 = 1 if ontrack_endyr2 == 0
+label var ontrack_endyr2_1 "Off-Track to Graduate Yr2"
+
+gen ontrack_endyr2_2 = 0
+replace ontrack_endyr2_2 = 1 if ontrack_endyr2 == 1 &amp; cum_gpa_yr2 &lt; 3.0 &amp; !mi(cum_gpa_yr2)
+label var ontrack_endyr2_2 "On-Track, GPA &lt; 3.0"
+
+gen ontrack_endyr2_3 = 0
+replace ontrack_endyr2_3 = 1 if ontrack_endyr2 == 1 &amp; cum_gpa_yr2 &gt;= 3.0 &amp; !mi(cum_gpa_yr2)
+label var ontrack_endyr2_3 "On-Track, GPA &gt;= 3.0"
+
+gen ontrack_endyr2_4 = 0
+replace ontrack_endyr2_4 = 1 if status_after_yr2==3 | status_after_yr2==4
+label var ontrack_endyr2_4 "Dropout/Disappear"
+
+<span class="stcmt">//assert ontrack_endyr2_1 + ontrack_endyr2_2 + ontrack_endyr2_3 + ontrack_endyr2_4 == 1</span>
+
+<span class="stcmt">// Step 5: Determine the agency average for each of the indicators created in step 4.</span>
+collapse (mean) ontrack_endyr2_1 ontrack_endyr2_2 ontrack_endyr2_3 ontrack_endyr2_4, <span class="stcmt">///</span>
+by(ontrack_endyr1_gpa)
+foreach var of varlist ontrack_endyr2_1 ontrack_endyr2_2 ontrack_endyr2_3 ontrack_endyr2_4 {
+	replace `var' = ( `var' * 100)
+	format `var' %9.1f
+}
+
+<span class="stcmt">// Step 6: For students who are off-track upon completion of their second year of high school, convert the values to be negative for ease of visualization in the graph.</span>
+replace ontrack_endyr2_1 = ontrack_endyr2_1 * -1
+replace ontrack_endyr2_4 = ontrack_endyr2_4 * -1
+
+<span class="stcmt">// Step 7: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
+local temp_begin = `chrt_ninth_begin'-1
+local temp_end = `chrt_ninth_end'-1
+if `chrt_ninth_begin'==`chrt_ninth_end' {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin'"
+}
+else {
+    local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
+}
+
+<span class="stcmt">// Step 8: Graph the results</span>
+#delimit ;
+graph bar ontrack_endyr2_1 ontrack_endyr2_4 ontrack_endyr2_2 ontrack_endyr2_3 ,
+    over(ontrack_endyr1_gpa, label(labsize(vsmall)) gap(50)) outergap(50)
+    bar(1, fcolor(maroon*.4) lcolor(maroon*.4))
+    bar(2, fcolor(maroon*.8) lcolor(maroon*.8))
+    bar(3, fcolor(navy*.5) lcolor(navy*.5))
+    bar(4, fcolor(navy*.8) lcolor(navy*.8)) stack
+    blabel(bar, size(2) format(%8.0f) position(inside))
+legend(symxsize(2) symysize(2) rows(4) size(2)
+    region(lcolor(white)) position(2) order(4 3 1 2)
+    label(1 "Off-Track to Graduate")
+    label(2 "Dropout/Disappear")
+    label(3 "On-Track to" "Graduate, GPA&lt;3.0")
+    label(4 "On-Track to" "Graduate, GPA&gt;=3.0")
+    title("End of Tenth Grade" "On-Track Status", size(small)))
+title("End of Tenth Grade On-Track Status", size(medium))
+    subtitle("by End of Ninth Grade Status", size(small))
+    ytitle("Percent of Tenth Grade Students" "by Ninth Grade Status" " " " ", size(small))
+    yscale(range(-40(20)100))
+    ylabel(-40(20)100, nogrid labsize(small))
+    ylabel(-40 "40" -20 "20" 0 "0" 20 "20" 40 "40" 60 "60" 80 "80" 100 "100")
+    yline(0, lcolor(black) lwidth(vvthin))
+text(-130 60 "Ninth Grade On-Track Status", size(small))
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " " " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students who transferred into or out of ${agency_name} are excluded" "from the sample. All data from ${agency_name} administrative records.", span size(vsmall));
+#delimit cr
+
+graph export "figures/B2_OnTrack_Tenth_by_OnTrack_Ninth.png", replace width(1600) height(1200)
+

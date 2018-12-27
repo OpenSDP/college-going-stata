@@ -21,6 +21,7 @@ graph set window fontface "Open Sans"
 
 
 
+// Modify here, bug causes nav to spill behind body on ultra large resolutions
 
 
 
@@ -55,13 +56,13 @@ global chrt_grad_end_delayed = 2009
 
 // Step 1: Load the college-going analysis file into Stata
 use "$data/college_going_analysis", clear
- 
+
 // Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth >= `chrt_ninth_begin' & chrt_ninth <= `chrt_ninth_end')
- 
-// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters" 
+
+// Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"
 gen grad = (!mi(chrt_grad) & ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 & ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 & enrl_1oct_ninth_yr2_any == 1 & ontime_grad == 1)
@@ -72,52 +73,52 @@ preserve
 
 // 2. Calculate the mean of each outcome variable by agency
 	collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N = sid
-	
+
 // 3. Create a string variable called school_name equal to "${agency_name} Average"
 	gen school_name = "${agency_name} AVERAGE"
-	
+
 // 4. Save this data as a temporary file
 	tempfile agency_level
 	save `agency_level'
-	
+
 // 5. Restore the data to the original form
 restore
- 
+
 // Step 5: Create school-level maximum and minimum outcomes
 // 1. Create a variable school_name that takes on the value of studentsҠfirst high school attended
 gen school_name = first_hs_name
 // 2. Calculate the mean of each outcome variable by first high school attended
 collapse (mean) grad seamless_transitioners second_year_persisters (count) N = sid, by(school_name)
- 
+
 // 3. Identify the agency maximum values for each of the three outcome variables
 preserve
 	collapse (max) grad seamless_transitioners_any second_year_persisters (count) N
 	gen school_name = "${agency_name} MAX HS"
-	
+
 	tempfile agency_max
 	save `agency_max'
 restore
- 
+
 // 4. Identify the agency minimum values for each of the three outcome variables
 preserve
 	collapse (min) grad seamless_transitioners_any second_year_persisters (count) N
 	gen school_name = "${agency_name} MIN HS"
-	
+
 	tempfile agency_min
 	save `agency_min'
 restore
- 
+
 // 5. Append the three tempfiles to the school-level file loaded into Stata
 append using `agency_level'
 append using `agency_max'
 append using `agency_min'
- 
+
 // Step 6: Format the outcome variables so they read as percentages in the graph
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 // Step 7: Reformat the data file so that one variable contains all the outcomes of interest
 // 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence
 foreach i of numlist 1/4 {
@@ -134,7 +135,7 @@ bysort school_name: replace outcome = grad if time == 2
 bysort school_name: replace outcome = seamless_transitioners_any if time == 3
 bysort school_name: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 // Step 8: Prepare to graph the results
 // 1. Label the outcome
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" ///
@@ -146,11 +147,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 // Step 9: Graph the results
 #delimit ;
 twoway (connected outcome time if school_name == "${agency_name} AVERAGE",
@@ -186,27 +187,27 @@ graph export "$figures/A1_Overall_Progression.png", replace width(1600) height(1
 
 // Step 1: Load the college-going analysis file into Stata
 use "$data/college_going_analysis", clear
- 
+
 // Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth >= `chrt_ninth_begin' & chrt_ninth <= `chrt_ninth_end')
- 
+
 // Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"
 gen grad = (!mi(chrt_grad) & ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 & ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 & enrl_1oct_ninth_yr2_any == 1 & ontime_grad == 1)
- 
+
 // Step 4: Create average outcomes by race/ethnicity
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, ///
 by(race_ethnicity)
- 
+
 // Step 5: Format the outcome variables so they read as percentages in the graph
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 // Step 6: Reformat the data file so that one variable contains all the outcomes of interest
 // 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence
 foreach i of numlist 1/4 {
@@ -227,7 +228,7 @@ bysort race_ethnicity: replace outcome = grad if time == 2
 bysort race_ethnicity: replace outcome = seamless_transitioners_any if time == 3
 bysort race_ethnicity: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 // Step 7: Prepare to graph the results
 // 1. Label the outcome
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" ///
@@ -239,11 +240,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 // Step 8: Graph the results
 #delimit;
 twoway (connected outcome time if race_ethnicity==1,
@@ -282,19 +283,19 @@ graph export "$figures/A2_Progression_by_RaceEthnicity.png", replace width(1600)
 
 // Step 1: Load the college-going analysis file into Stata
 use "$data/college_going_analysis", clear
- 
+
 // Step 2: Keep students in ninth grade cohorts you can observe persisting to the second year of college AND are ever FRPL-eligible
 local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth >= `chrt_ninth_begin' & chrt_ninth <= `chrt_ninth_end')
 keep if frpl_ever == 1
- 
+
 // Next, repeat steps 3-9 from the previous analysis
 // Step 3: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters" .
 gen grad = (!mi(chrt_grad) & ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 & ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 & enrl_1oct_ninth_yr2_any == 1 & ontime_grad == 1)
- 
+
 // Step 4: Create average outcomes by race/ethnicity and drop any race/ethnic groups with fewer than 20 students
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, by(race_ethnicity)
 drop if N < 20
@@ -304,7 +305,7 @@ foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 // Step 6: Reformat the data file so that one variable contains all the outcomes of interest
 // 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence
 foreach i of numlist 1/4 {
@@ -325,7 +326,7 @@ bysort race_ethnicity: replace outcome = grad if time == 2
 bysort race_ethnicity: replace outcome = seamless_transitioners_any if time == 3
 bysort race_ethnicity: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 // Step 7: Prepare to graph the results
 // 1. Label the outcome
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" ///
@@ -337,11 +338,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 // Step 8: Graph the results
 #delimit ;
 twoway (connected outcome time if race_ethnicity==1 , sort lcolor(dknavy) mlabel(outcome)
@@ -381,7 +382,7 @@ local chrt_ninth_begin = ${chrt_ninth_begin_persist_yr2}
 local chrt_ninth_end = ${chrt_ninth_end_persist_yr2}
 keep if (chrt_ninth >= `chrt_ninth_begin' & chrt_ninth <= `chrt_ninth_end')
 keep if ontrack_sample == 1
- 
+
 // Step 3: Generate on-track indicators that take into account studentsҠGPAs upon completion of their first year in high school
 label define ot 1 "Off-Track to Graduate" ///
 2 "On-Track to Graduate, GPA < 3.0" ///
@@ -394,22 +395,22 @@ replace ontrack_endyr1_gpa = 3 if ontrack_endyr1 == 2 & cum_gpa_yr1 >= 3 & !mi(c
 
 assert !mi(ontrack_endyr1_gpa) if !mi(ontrack_endyr1) & !mi(cum_gpa_yr1)
 label values ontrack_endyr1_gpa ot
- 
+
 // Step 4: Create variables for the outcomes "regular diploma recipients", "seamless transitioners" and "second year persisters"
 gen grad = (!mi(chrt_grad) & ontime_grad == 1)
 gen seamless_transitioners_any = (enrl_1oct_ninth_yr1_any == 1 & ontime_grad == 1)
 gen second_year_persisters = (enrl_1oct_ninth_yr1_any == 1 & enrl_1oct_ninth_yr2_any == 1 & ontime_grad == 1)
- 
+
 // Step 5: Create average outcomes by on-track status at the end of ninth grade
 collapse (mean) grad seamless_transitioners_any second_year_persisters (count) N=sid, ///
 by(ontrack_endyr1_gpa)
- 
+
 // Step 6: Format the outcome variables so they read as percentages in the graph
 foreach var of varlist grad seamless_transitioners_any second_year_persisters {
 	replace `var' = (`var' * 100)
 	format `var' %9.1f
 }
- 
+
 // Step 7: Reformat the data file so that one variable contains all the outcomes of interest
 // 1. Create 4 observations for each school: ninth grade, hs graduation, seamless college transition and second-year persistence
 foreach i of numlist 1/4 {
@@ -425,7 +426,7 @@ bysort ontrack_endyr1_gpa: replace outcome = grad if time == 2
 bysort ontrack_endyr1_gpa: replace outcome = seamless_transitioners_any if time == 3
 bysort ontrack_endyr1_gpa: replace outcome = second_year_persisters if time == 4
 format outcome %9.1f
- 
+
 // Step 8: Prepare to graph the results
 // 1. Label the outcome
 label define outcome 1 "Ninth Graders" 2 "On-time Graduates" ///
@@ -437,11 +438,11 @@ local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
 		local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 // Step 9: Graph the results
 #delimit ;
 twoway (connected outcome time if ontrack_endyr1_gpa == 1,
@@ -473,7 +474,6 @@ note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders. Students
 #delimit cr
 
 graph export "$figures/A4_Progression_by_OnTrack_Ninth.png", replace width(1600) height(1200)
-
 
 
 

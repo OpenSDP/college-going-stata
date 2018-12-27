@@ -3,12 +3,12 @@
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata.</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores.</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8_std)
- 
+
 <span class="stcmt">// Step 3: Obtain agency-level high school completion rate and prior achievement score along with the position of their labels.</span>
 summ ontime_grad
 local agency_mean_grad = `r(mean)'*100
@@ -16,19 +16,19 @@ local agency_mean_grad_label = `agency_mean_grad' + 3
 summ test_math_8_std
 local agency_mean_test = `r(mean)'
 local agency_mean_test_label = `agency_mean_test' + 0.15
- 
+
 <span class="stcmt">// Step 4: Obtain school-level high school completion and prior achievement rates</span>
 collapse (mean) test_math_8_std ontime_grad (count) N = sid, by(first_hs_code first_hs_name)
 drop if N &lt; 20
- 
+
 <span class="stcmt">// Step 5: Multiply the high school completion rate by 100 for graphical representation of the rates,</span>
 replace ontime_grad = round((ontime_grad * 100), .1)
- 
+
 <span class="stcmt">// Step 6: Shorten high school names and create a legend label for the graph</span>
 sort first_hs_name
 replace first_hs_name = subinstr(first_hs_name, " High School", "", .)
 gen hs_code_label = _n
- 
+
 levelsof first_hs_name, local(hs_names)
 local count = 1
 local legend_labels ""
@@ -36,18 +36,18 @@ foreach hs of local hs_names {
     local legend_labels `"`legend_labels' `count' = `hs'"' `" "'
     local ++count
 }
- 
+
 <span class="stcmt">// Step 7: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 8: Graph the results</span>
 #delimit ;
 twoway (scatter ontime_grad test_math_8_std, mlabel(hs_code_label) mlabsize(vsmall)

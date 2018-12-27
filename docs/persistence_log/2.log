@@ -1,104 +1,25 @@
 
-<span class="stcmt">// Persistence Rates to the Second Year of College by High School</span>
+<span class="stcmt">// Sample Restrictions</span>
 
-<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
-use "$data/college_going_analysis", clear
- 
-<span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation</span>
-local chrt_grad_begin = ${chrt_grad_begin}
-local chrt_grad_end = ${chrt_grad_end}
-keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
- 
-<span class="stcmt">// Step 3: Rename outcome variable names for simplicity</span>
-rename enrl_grad_persist_any persist_any
-rename enrl_grad_persist_2yr persist_2yr
-rename enrl_grad_persist_4yr persist_4yr
-rename enrl_1oct_grad_yr1_any enrl_any
-rename enrl_1oct_grad_yr1_2yr enrl_2yr
-rename enrl_1oct_grad_yr1_4yr enrl_4yr
- 
-<span class="stcmt">// Step 4: Obtain the agency-level average for persistence and enrollment</span>
-preserve
-	collapse (sum) persist_any enrl_4yr if enrl_4yr==1
-	tempfile agency_level_4yr
-	save `agency_level_4yr'
-restore
- 
-preserve
-	collapse (sum) persist_any enrl_2yr if enrl_2yr==1
-	tempfile agency_level_2yr
-	save `agency_level_2yr'
-restore
- 
-<span class="stcmt">// Step 5: Obtain the school-level average for persistence and enrollment</span>
-preserve
-	collapse (sum) persist_any enrl_4yr if enrl_4yr==1, by(last_hs_code last_hs_name)
-	tempfile school_level_4yr
-	save `school_level_4yr'
-restore 
- 
-collapse (sum) persist_any enrl_2yr if enrl_2yr==1, by(last_hs_code last_hs_name)
- 
-<span class="stcmt">// Step 6: Append on the previous agency-level and school-level files</span>
-append using `agency_level_4yr'
-append using `agency_level_2yr'
-append using `school_level_4yr'
- 
-<span class="stcmt">// Step 7: Provide a hs name label for the agency average and shorten hs name</span>
-replace last_hs_code = 0 if last_hs_code == .
-replace last_hs_name = "${agency_name} AVERAGE" if mi(last_hs_name)
-replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
- 
-<span class="stcmt">// Step 8: Calculate percent persistence at 4-year and 2-year colleges and multiply outcomes of interest by 100 for graphical representation of the rates</span>
-gen pct_persist_any = persist_any / enrl_4yr
-replace pct_persist_any = round((pct_persist_any * 100))
-foreach type in 2yr 4yr {
-	gen pct_persist_`type' = persist_any / enrl_`type'
-	replace pct_persist_`type' = round((pct_persist_`type' * 100))
-}
- 
-<span class="stcmt">// Step 9: Drop any high schools with fewer than 20 students</span>
-drop if enrl_4yr &lt; 20
-drop if enrl_2yr &lt; 20
- 
-<span class="stcmt">// Step 10: Consolidate persistence data into single column and then reshape the data</span>
-gen n=2 if pct_persist_2yr~=.
-replace n=4 if pct_persist_4yr~=.
-replace pct_persist_4yr= pct_persist_2yr if pct_persist_4yr==.
-keep last_hs_code last_hs_name pct_persist_4yr n
-rename pct_persist_4yr pct_persist
-reshape wide pct_persist, i(last_hs_name) j(n)
- 
-<span class="stcmt">// Step 11: Prepare to graph the results</span>
-<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
-local temp_begin = `chrt_grad_begin'-1
-local temp_end = `chrt_grad_end'-1
-if `chrt_grad_begin'==`chrt_grad_end' {
-    local chrt_label "`temp_begin'-`chrt_grad_begin'"
-} 
-else {
-    local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
-}
- 
-<span class="stcmt">// Step 12: Graph the results</span>
-#delimit ;
-graph bar pct_persist4 pct_persist2, 
-    over(last_hs_name, label(angle(45)labsize(small)) sort(pct_persist4)) bargap(0) outergap(100) 
-    bar(1, fcolor(dkorange) fi(inten70) lcolor(dkorange) lwidth(vvvthin)) 
-    bar(2, fcolor(navy) fi(inten60) lcolor(navy) lwidth(vvvthin)) 
-    blabel(total, position(outside) color(black) size(vsmall) format(%8.0f)) 
-legend(label(1 "4-year College") label(2 "2-year College") 
-    position(11) ring(1) symxsize(2) symysize(2) rows(2) size(small) region(lstyle(none) lcolor(none) color(none)))  
-title("College Persistence by High School, at Any College") 
-    subtitle("Seamless Enrollers by Type of College") 
-    ytitle("% of Seamless Enrollers") 
-    yscale(range(0(20)100)) 
-    ylabel(0(20)100, nogrid) 
-graphregion(color(white) fcolor(white) lcolor(white)) 
-plotregion(color(white) fcolor(white) lcolor(white)) 
-note(" " "Sample: `chrt_label' ${agency_name} high school graduates. Postsecondary enrollment outcomes from NSC matched records." 
-"All other data from agency administrative records.", size(vsmall));            
-#delimit cr 
-       
-graph export "figures/E1_Persistence_by_HS.png", replace width(1600) height(1200)
+<span class="stcmt">// Agency name</span>
+global agency_name "Agency"
 
+<span class="stcmt">// Ninth grade cohorts you can observe persisting to the second year of college</span>
+global chrt_ninth_begin_persist_yr2 = 2004
+global chrt_ninth_end_persist_yr2 = 2006
+
+<span class="stcmt">// Ninth grade cohorts you can observe graduating high school on time</span>
+global chrt_ninth_begin_grad = 2004
+global chrt_ninth_end_grad = 2006
+
+<span class="stcmt">// Ninth grade cohorts you can observe graduating high school one year late</span>
+global chrt_ninth_begin_grad_late = 2004
+global chrt_ninth_end_grad_late = 2006
+
+<span class="stcmt">// High school graduation cohorts you can observe enrolling in college the fall after graduation</span>
+global chrt_grad_begin = 2007
+global chrt_grad_end = 2009
+
+<span class="stcmt">// High school graduation cohorts you can observe enrolling in college two years after hs graduation</span>
+global chrt_grad_begin_delayed = 2007
+global chrt_grad_end_delayed = 2009

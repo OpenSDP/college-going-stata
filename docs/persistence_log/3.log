@@ -1,127 +1,104 @@
 
-<span class="stcmt">// Persistence Across Two-Year and Four-Year Colleges</span>
+<span class="stcmt">// Persistence Rates to the Second Year of College by High School</span>
 
-<span class="stcmt">// Step 1:Load the college-going analysis file into Stata</span>
-use "$data/college_going_analysis", clear 
- 
+<span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
+use "$data/college_going_analysis", clear
+
 <span class="stcmt">// Step 2: Keep students in high school graduation cohorts you can observe enrolling in college the fall after graduation</span>
 local chrt_grad_begin = ${chrt_grad_begin}
 local chrt_grad_end = ${chrt_grad_end}
 keep if (chrt_grad &gt;= `chrt_grad_begin' &amp; chrt_grad &lt;= `chrt_grad_end')
- 
+
 <span class="stcmt">// Step 3: Rename outcome variable names for simplicity</span>
+rename enrl_grad_persist_any persist_any
 rename enrl_grad_persist_2yr persist_2yr
-rename enrl_1oct_grad_yr1_2yr enrl_2yr
 rename enrl_grad_persist_4yr persist_4yr
+rename enrl_1oct_grad_yr1_any enrl_any
+rename enrl_1oct_grad_yr1_2yr enrl_2yr
 rename enrl_1oct_grad_yr1_4yr enrl_4yr
- 
-<span class="stcmt">// Step 4: Create binary outcomes for enrollers who switch from 4-yr to 2-yr, or vice versa</span>
-gen persist_4to2yr = (enrl_4yr == 1 &amp; enrl_1oct_grad_yr2_2yr == 1) if !mi(chrt_grad)
-gen persist_2to4yr = (enrl_2yr == 1 &amp; enrl_1oct_grad_yr2_4yr == 1) if !mi(chrt_grad)
- 
-<span class="stcmt">// Step 5: Obtain the agency-level average for the different persistence outcomes</span>
+
+<span class="stcmt">// Step 4: Obtain the agency-level average for persistence and enrollment</span>
 preserve
-	collapse (sum) persist_4yr persist_4to2yr enrl_4yr persist_2yr persist_2to4yr enrl_2yr
-	tempfile agency_level
-	save `agency_level'
+	collapse (sum) persist_any enrl_4yr if enrl_4yr==1
+	tempfile agency_level_4yr
+	save `agency_level_4yr'
 restore
- 
-<span class="stcmt">// Step 6: Obtain the school-level average for the different persistence outcomes</span>
-collapse (sum) persist_4yr persist_4to2yr enrl_4yr persist_2yr persist_2to4yr enrl_2yr, by(last_hs_code last_hs_name)
-append using `agency_level'
- 
+
+preserve
+	collapse (sum) persist_any enrl_2yr if enrl_2yr==1
+	tempfile agency_level_2yr
+	save `agency_level_2yr'
+restore
+
+<span class="stcmt">// Step 5: Obtain the school-level average for persistence and enrollment</span>
+preserve
+	collapse (sum) persist_any enrl_4yr if enrl_4yr==1, by(last_hs_code last_hs_name)
+	tempfile school_level_4yr
+	save `school_level_4yr'
+restore
+
+collapse (sum) persist_any enrl_2yr if enrl_2yr==1, by(last_hs_code last_hs_name)
+
+<span class="stcmt">// Step 6: Append on the previous agency-level and school-level files</span>
+append using `agency_level_4yr'
+append using `agency_level_2yr'
+append using `school_level_4yr'
+
 <span class="stcmt">// Step 7: Provide a hs name label for the agency average and shorten hs name</span>
-replace last_hs_name = "${agency_name} Average" if mi(last_hs_name)
-replace last_hs_code = 0 if mi(last_hs_code)
+replace last_hs_code = 0 if last_hs_code == .
+replace last_hs_name = "${agency_name} AVERAGE" if mi(last_hs_name)
 replace last_hs_name = subinstr(last_hs_name, " High School", "", .)
- 
-<span class="stcmt">// Step 8: Generate percentages for different persistence outcomes.  Multiply outcomes of interest by 100 for graphical representations of the rates</span>
-gen pct_persist_4yr = persist_4yr / enrl_4yr
-gen pct_persist_4to2yr = persist_4to2yr / enrl_4yr
-gen pct_persist_2yr = persist_2yr / enrl_2yr
-gen pct_persist_2to4yr = persist_2to4yr / enrl_2yr
- 
-foreach var in pct_persist_2yr pct_persist_2to4yr pct_persist_4yr pct_persist_4to2yr {
-	replace `var' = round((`var' * 100))
+
+<span class="stcmt">// Step 8: Calculate percent persistence at 4-year and 2-year colleges and multiply outcomes of interest by 100 for graphical representation of the rates</span>
+gen pct_persist_any = persist_any / enrl_4yr
+replace pct_persist_any = round((pct_persist_any * 100))
+foreach type in 2yr 4yr {
+	gen pct_persist_`type' = persist_any / enrl_`type'
+	replace pct_persist_`type' = round((pct_persist_`type' * 100))
 }
- 
-<span class="stcmt">// Step 9: Create total persistence rates by summing up the other variables</span>
-gen total_persist_4yr = pct_persist_4yr + pct_persist_4to2yr
-gen total_persist_2yr = pct_persist_2yr + pct_persist_2to4yr
- 
-<span class="stcmt">//Step 10: Prepare to graph the results</span>
-<span class="stcmt">// 1. Generate a cohort label to be used in the footnote for the graph</span>
+
+<span class="stcmt">// Step 9: Drop any high schools with fewer than 20 students</span>
+drop if enrl_4yr &lt; 20
+drop if enrl_2yr &lt; 20
+
+<span class="stcmt">// Step 10: Consolidate persistence data into single column and then reshape the data</span>
+gen n=2 if pct_persist_2yr~=.
+replace n=4 if pct_persist_4yr~=.
+replace pct_persist_4yr= pct_persist_2yr if pct_persist_4yr==.
+keep last_hs_code last_hs_name pct_persist_4yr n
+rename pct_persist_4yr pct_persist
+reshape wide pct_persist, i(last_hs_name) j(n)
+
+<span class="stcmt">// Step 11: Prepare to graph the results</span>
+<span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_grad_begin'-1
 local temp_end = `chrt_grad_end'-1
 if `chrt_grad_begin'==`chrt_grad_end' {
     local chrt_label "`temp_begin'-`chrt_grad_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_grad_begin' through `temp_end'-`chrt_grad_end'"
 }
-<span class="stcmt">// 2. Generate graphing code to place value labels for the total persistence rates; change xpos (the position of the first leftmost label) and xposwidth (the horizontal width of the labels) to finetune.</span>
-foreach yr in 4 2 {
-    sort total_persist_`yr'yr
-    local total_persist_`yr'yr ""
-    local num_obs = _N
-    foreach n of numlist 1/`num_obs' {
-    local temp_total_persist_`yr'yr = total_persist_`yr'yr in `n'
-    local total_persist_`yr'yr `"`total_persist_`yr'yr' `temp_total_persist_`yr'yr'"'
-    }
-    local total_persist_`yr'yr_label ""
-    local xpos = 7
-    local xposwidth = 93.5
-    foreach val of local total_persist_`yr'yr {
-    local val_pos = `val' + 6
-    local total_persist_`yr'yr_label `"`total_persist_`yr'yr_label' text(`val_pos' `xpos' "`val'", size(2.1) color(gs7))"'
-    local xpos = `xpos' + `xposwidth'/_N
-    }
-    disp `"`total_persist_`yr'yr_label'"'
-}
 
-<span class="stcmt">// Step 11: Graph the results (1/2) for seamless enrollers at 4-year colleges</span>
+<span class="stcmt">// Step 12: Graph the results</span>
 #delimit ;
-graph bar pct_persist_4yr pct_persist_4to2yr if enrl_4yr &gt;= 20, 
-    over(last_hs_name, label(angle(45)labsize(small)) sort(total_persist_4yr)) bargap(0) outergap(100) 
-    bar(1, fcolor(dkorange) fi(inten70) lcolor(dkorange) lwidth(vvvthin)) 
-    bar(2, fcolor(navy) fi(inten60) lcolor(navy) lwidth(vvvthin)) stack 
-    blabel(bar, position(inside) color(black) size(vsmall) format(%8.0f)) 
-legend(label(1 "Persisted at 4-year College") label(2 "Switched to 2-year College") 
-    position(11) order(2 1) ring(1) symxsize(2) symysize(2) rows(2) size(small) region(lstyle(none) lcolor(none) color(none)))  
-title("College Persistence by High School") 
-    subtitle("Seamless Enrollers at 4-year Colleges") 
-    `total_persist_4yr_label'
-    ytitle("Percent of Seamless Enrollers") 
-    yscale(range(0(20)100)) 
-    ylabel(0(20)100, nogrid) 
-graphregion(color(white) fcolor(white) lcolor(white)) 
-plotregion(color(white) fcolor(white) lcolor(white)) 
-note(" " "Sample: `chrt_label' ${agency_name} high school graduates. Postsecondary enrollment outcomes from NSC matched records." 
+graph bar pct_persist4 pct_persist2,
+    over(last_hs_name, label(angle(45)labsize(small)) sort(pct_persist4)) bargap(0) outergap(100)
+    bar(1, fcolor(dkorange) fi(inten70) lcolor(dkorange) lwidth(vvvthin))
+    bar(2, fcolor(navy) fi(inten60) lcolor(navy) lwidth(vvvthin))
+    blabel(total, position(outside) color(black) size(vsmall) format(%8.0f))
+legend(label(1 "4-year College") label(2 "2-year College")
+    position(11) ring(1) symxsize(2) symysize(2) rows(2) size(small) region(lstyle(none) lcolor(none) color(none)))
+title("College Persistence by High School, at Any College")
+    subtitle("Seamless Enrollers by Type of College")
+    ytitle("% of Seamless Enrollers")
+    yscale(range(0(20)100))
+    ylabel(0(20)100, nogrid)
+graphregion(color(white) fcolor(white) lcolor(white))
+plotregion(color(white) fcolor(white) lcolor(white))
+note(" " "Sample: `chrt_label' ${agency_name} high school graduates. Postsecondary enrollment outcomes from NSC matched records."
 "All other data from agency administrative records.", size(vsmall));
 #delimit cr
 
-graph export "figures/E2a_Persistence_4yr_Seamless_Enrlers.png", replace width(1600) height(1200)
-
-<span class="stcmt">// Step 12: Graph the results (1/2) for seamless enrollers at 2-year colleges</span>
-#delimit ;
-graph bar pct_persist_2yr pct_persist_2to4yr if enrl_4yr &gt;= 20, 
-    over(last_hs_name, label(angle(45)labsize(small)) sort(total_persist_2yr)) bargap(0) outergap(100) 
-    bar(1, fcolor(navy) fi(inten60) lcolor(navy) lwidth(vvvthin)) 
-    bar(2, fcolor(dkorange) fi(inten70) lcolor(dkorange) lwidth(vvvthin)) stack 
-    blabel(bar, position(inside) color(black) size(vsmall) format(%8.0f)) 
-legend(label(2 "Switched to 4-year College") label(1 "Persisted at 2-year College") 
-    position(11) order(2 1) ring(1) symxsize(2) symysize(2) rows(2) size(small) region(lstyle(none) lcolor(none) color(none)))  
-title("College Persistence by High School") 
-    subtitle("Seamless Enrollers at 2-year Colleges") 
-    `total_persist_2yr_label'
-    ytitle("Percent of Seamless Enrollers") 
-    yscale(range(0(20)100)) 
-    ylabel(0(20)100, nogrid) 
-graphregion(color(white) fcolor(white) lcolor(white)) 
-plotregion(color(white) fcolor(white) lcolor(white)) 
-note(" " "Sample: `chrt_label' ${agency_name} high school graduates. Postsecondary enrollment outcomes from NSC matched records." 
-"All other data from agency administrative records.", size(vsmall));
-#delimit cr
-  
-graph export "figures/E2b_Persistence_2yr_Seamless_Enrlers.png", replace width(1600) height(1200)
+graph export "figures/E1_Persistence_by_HS.png", replace width(1600) height(1200)
 

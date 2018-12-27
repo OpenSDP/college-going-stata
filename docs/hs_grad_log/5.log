@@ -3,34 +3,34 @@
 
 <span class="stcmt">// Step 1: Load the college-going analysis file into Stata</span>
 use "$data/college_going_analysis", clear
- 
+
 <span class="stcmt">// Step 2: Keep students in ninth grade cohorts you can observe graduating high school AND have non-missing eighth grade math scores</span>
 local chrt_ninth_begin = ${chrt_ninth_begin_grad}
 local chrt_ninth_end = ${chrt_ninth_end_grad}
 keep if (chrt_ninth &gt;= `chrt_ninth_begin' &amp; chrt_ninth &lt;= `chrt_ninth_end') &amp; !mi(test_math_8)
- 
+
 <span class="stcmt">// Step 3: Obtain the average on-time high school completion rate by race/ethnicity; you will restore in step 8</span>
 preserve
 	collapse (mean) ontime_grad (count) N=sid, by(race_ethnicity)
- 
+
 <span class="stcmt">// Step 4: Multiply the high school completion rate by 100 for graphical representation of the rates</span>
 	replace ontime_grad = (ontime_grad * 100)
- 
+
 <span class="stcmt">// Step 5: Reshape the data wide so that each race is associated with the outcome variable</span>
 	gen id = _n
 	reshape wide ontime_grad, i(id) j(race_ethnicity)
- 
+
 <span class="stcmt">// Step 6: Prepare to graph the results</span>
 <span class="stcmt">// Generate a cohort label to be used in the footnote for the graph</span>
 local temp_begin = `chrt_ninth_begin'-1
 local temp_end = `chrt_ninth_end'-1
 if `chrt_ninth_begin'==`chrt_ninth_end' {
     local chrt_label "`temp_begin'-`chrt_ninth_begin'"
-} 
+}
 else {
     local chrt_label "`temp_begin'-`chrt_ninth_begin' through `temp_end'-`chrt_ninth_end'"
 }
- 
+
 <span class="stcmt">// Step 7: Graph the results (1/2)</span>
 #delimit ;
 graph bar ontime_grad3 ontime_grad1 ontime_grad5 ontime_grad2,
@@ -62,13 +62,13 @@ restore
 collapse (mean) ontime_grad (count) N=sid, by(race_ethnicity qrt_8_math)
 replace ontime_grad = (ontime_grad * 100)
 reshape wide ontime_grad, i(qrt_8_math N) j(race_ethnicity)
- 
+
 <span class="stcmt">// Step 9: Graph the results (2/2)</span>
 #delimit ;
 graph bar ontime_grad3 ontime_grad1 ontime_grad5 ontime_grad2, over(qrt_8_math,
     relabel(1 "Bottom Quartile" 2 "2nd Quartile" 3 "3rd Quartile" 4 "Top Quartile") label(labsize(small)))
     bar(1, fcolor(forest_green*.7) lcolor(forest_green*.7)) bar(2, fcolor(dknavy*.7) lcolor(dknavy*.7))
-    bar(3, fcolor(orange*.7) lcolor(orange*.7)) bar(4, fcolor(lavender*.85) lcolor(lavender*.85)) 
+    bar(3, fcolor(orange*.7) lcolor(orange*.7)) bar(4, fcolor(lavender*.85) lcolor(lavender*.85))
     blabel(bar, format(%8.0f))
 title("On-Time High School Graduation Rates")
     subtitle("By Race and Prior Achievement")
