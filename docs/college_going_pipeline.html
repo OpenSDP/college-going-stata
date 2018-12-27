@@ -1,17 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>college_going_pipeline</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
-<!DOCTYPE html>
+&lt;!DOCTYPE html&gt;
 <html lang="en">
 <head>
-<meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name="format-detection" content="telephone=no">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
 <title>
 college_going_pipeline.md
 </title>
@@ -29,6 +40,15 @@ pre code, pre samp { white-space: pre; }
 </style>
 </head>
 <body>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129904036-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+ 
+  gtag('config', 'UA-129904036-1');
+</script>
 <style>
 .affix {
    position: static;
@@ -125,7 +145,7 @@ html {
 <a href="#h-1-2-3">Progression by Student Race/Ethnicity, Among FRPL Students</a>
 </li>
 <li>
-<a href="#h-1-2-4">Progression by Students' On-Track Status After Ninth Grade</a>
+<a href="#h-1-2-4">Progression by Students’ On-Track Status After Ninth Grade</a>
 </li>
 </ul>
 </li>
@@ -152,7 +172,7 @@ Objective
 Using this Guide
 </h3>
 <p>The College-Going Pathways series is a set of guides, code, and sample data about policy-relevant college-going topics. Browse this and other guides in the series for ideas about ways to investigate student pathways through high school and college. Each guide includes several analyses in the form of charts together with Stata analysis and graphing code to generate each chart.</p>
-<p>Once you’ve identified analyses that you want to try to replicate or modify, click the &quot;Download&quot; buttons to download Stata code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you're familiar with Github, you can click &quot;Go to Repository&quot; and clone the entire College-Going Pathways repository to your own computer.</p>
+<p>Once you’ve identified analyses that you want to try to replicate or modify, click the “Download” buttons to download Stata code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you’re familiar with Github, you can click “Go to Repository” and clone the entire College-Going Pathways repository to your own computer.</p>
 <h3 id="h-1-1-3">
 About the Data
 </h3>
@@ -599,7 +619,7 @@ note(" " "Sample: `chrt_label' ${agency_name} first-time ninth graders." "Postse
 graph export "$figures/A3_Progression_by_RaceEthnicity_Frpl.png", replace width(1600) height(1200)
 </code></pre>
 <h3 id="h-1-2-4">
-Progression by Students' On-Track Status After Ninth Grade
+Progression by Students’ On-Track Status After Ninth Grade
 </h3>
 <p><strong>Purpose:</strong> This analysis tracks the percent of ninth graders at different levels of being on-track for graduation who complete high school on-time, seamlessly enroll in college, and then persist to the second year of college.</p>
 <p><strong>Required Analysis File Variables:</strong></p>

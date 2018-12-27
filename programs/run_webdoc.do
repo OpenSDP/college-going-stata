@@ -1,5 +1,5 @@
 // Change the path in the next line to your top-level working directory
-cd "C:\repositories\college-going-stata"
+cd "../"
 
 foreach doc in pipeline ontrack hs_grad enrollment persistence {
 

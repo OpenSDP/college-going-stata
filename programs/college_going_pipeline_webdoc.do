@@ -1,5 +1,5 @@
 // Change the path in the next line to your top-level working directory
-cd "C:/repositories/college-going-stata"
+// cd "C:/repositories/college-going-stata"
 
 // Change the path below to the directory where you will store programs
 global programs "./programs"
